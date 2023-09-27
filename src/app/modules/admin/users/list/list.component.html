@@ -1,0 +1,85 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
+    <mat-drawer-container class="flex-auto h-full bg-card dark:bg-transparent" (backdropClick)="onBackdropClicked()">
+
+        <mat-drawer class="w-full md:w-160 dark:bg-gray-900" [mode]="drawerMode" [opened]="false" [position]="'end'" [disableClose]="true" #matDrawer>
+            <router-outlet></router-outlet>
+        </mat-drawer>
+
+        <mat-drawer-content class="flex flex-col">
+            <div class="flex-auto">
+                <div class="flex flex-col sm:flex-row md:flex-col flex-auto justify-between py-8 px-6 md:px-8 border-b">
+                    <!-- Title -->
+                    <div>
+                        <div class="text-4xl font-extrabold tracking-tight leading-none">Usuarios</div>
+                        <div class="ml-0.5 font-medium text-secondary">
+                            <ng-container *ngIf="usersCount > 0">
+                                {{usersCount}}
+                            </ng-container>
+                            {{usersCount | i18nPlural: { '=0' : 'Sin Usuarios', '=1' : 'usuario', 'other': 'usuarios' } }}
+                        </div>
+                    </div>
+                    <!-- Main Action -->
+                    <div class="flex items-center mt-4 sm:mt md:mt-4">
+                        <!-- Search -->
+                        <div class="flex-auto">
+                            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded w-full min-w-50">
+                                <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                <input matInput [formControl]="searchInputControl" [autocomplete]="'off'" [placeholder]="'Buscar...'">
+                            </mat-form-field>
+                        </div>
+                        <!-- Add Area Button -->
+                        <button class="ml-4" mat-flat-button [color]="'primary'" (click)="createUser()">
+                            <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                            <span class="ml-2 mr-1">Agregar</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Areas List -->
+                <div class="relative">
+                    <!-- Loader -->
+                    <div class="inset-x-0 bottom-0" *ngIf="isLoading">
+                        <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
+                    </div>
+                    <ng-container *ngIf="users$ | async as users">
+                        <ng-container *ngIf="users.length; else empty">
+                            <ng-container *ngFor="let user of users; let i = index; trackBy: trackByFn">
+                                <!-- Group -->
+                                <ng-container *ngIf="i === 0 || user.name.charAt(0) !== users[i - 1].name.charAt(0)">
+                                    <div class="z-10 sticky top-0 -mt-px px-6 py-1 md:px-8 border-t border-b font-medium uppercase text-secondary bg-gray-50 dark:bg-gray-900">
+                                        {{user.name.charAt(0)}}
+                                    </div>
+                                </ng-container>
+                                <!-- Areas -->
+                                <a class="z-20 flex items-center px-6 py-4 md:px-8 cursor-pointer border-b" [ngClass]="{'hover:bg-primary-100 dark:hover:bg-primary-600': !selectedUser || selectedUser.id !== user.id,
+                                'bg-primary-100 dark:bg-primary-600' : selectedUser && selectedUser.id === user.id}" [routerLink]="['./', user.id]">
+                                    <div class="flex flex-0 items-center justify-center w-10 h-10 rounded-full overflow-hidden">
+                                        <div class="flex items-center justify-center w-full h-full rounded-full" [ngClass]="{'text-green-800 bg-green-200 dark:text-green-100 dark:bg-green-500': (user.status|lowercase) === 'active',
+                                        'text-red-800 bg-red-200 dark:text-red-100 dark:bg-red-500': (user.status|lowercase) === 'inactive'}">
+                                            <!-- Activo -->
+                                            <ng-container *ngIf="(user.status|lowercase) === 'active'">
+                                                <mat-icon class="icon-size-5 text-current" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                            </ng-container>
+
+                                            <!-- Inactivo -->
+                                            <ng-container *ngIf="(user.status|lowercase) === 'inactive'">
+                                                <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                            </ng-container>
+                                        </div>
+                                    </div>
+                                    <div class="min-w-0 ml-4">
+                                        <div class="font-medium leading-5 truncate">{{user.name}} {{user.last_name}}</div>
+                                        <div class="leading-5 truncate text-secondary dark:text-gray-200">{{user.position}}</div>
+                                    </div>
+                                </a>
+                            </ng-container>
+                        </ng-container>
+                    </ng-container>
+
+                    <ng-template #empty>
+                        <div class="p-8 sm:p-16 border-t text-4xl font-semibold tracking-tight text-center">No existen Areas!</div>
+                    </ng-template>
+                </div>
+            </div>
+        </mat-drawer-content>
+    </mat-drawer-container>
+</div>

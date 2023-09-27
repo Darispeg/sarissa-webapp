@@ -1,0 +1,394 @@
+<div class="flex flex-col w-full">
+    <!-- View mode -->
+    <ng-container *ngIf="!editMode">
+        <!-- Header -->
+        <div class="flex items-center justify-between bg-primary-600 w-full h-20 p-6 pt-0 pb-0 sm:px-12">
+            <div class="flex items-center justify-center mx-auto">
+                <span class="text-white text-2xl font-semibold truncate text-center">INFORMACION DEL PROYECTO</span>
+            </div>
+            <div class="flex items-center">
+                <!-- More menu -->
+                <button mat-icon-button [matMenuTriggerFor]="moreMenu">
+                    <mat-icon class="text-white" svgIcon="heroicons_outline:dots-vertical"></mat-icon>
+                </button>
+                <mat-menu #moreMenu="matMenu">
+                    <button mat-menu-item (click)="toggleEditMode(true)">
+                        <mat-icon svgIcon="heroicons_solid:pencil-alt"></mat-icon>
+                        <span class="ml-2">Editar</span>
+                    </button>
+                    <mat-divider></mat-divider>
+                    <button mat-menu-item>
+                        <mat-icon class="text-red-500" svgIcon="heroicons_outline:trash"></mat-icon>
+                        <span class="text-red-500">Eliminar </span>
+                    </button>
+                </mat-menu>
+
+                <!-- Close button -->
+                <button mat-icon-button matTooltip="Cerrar" [routerLink]="['../']">
+                    <mat-icon class="text-white" svgIcon="heroicons_outline:x"></mat-icon>
+                </button>
+            </div>
+
+        </div>
+
+        <div class="relative flex flex-col flex-auto items-center p-6 pt-0 sm:p-12 sm:pt-0">
+            <div class="w-full max-w-3xl">
+                <!-- Title -->
+                <div class="mt-3 text-4xl font-bold truncate text-center">{{project.title}}</div>
+                
+                <div class="grid grid-cols-2">
+                    <!-- Title -->
+                    <div class="flex sm:items-center mt-8">
+                        <mat-icon class="icon-size-5" svgIcon="heroicons_outline:clipboard-list"></mat-icon>
+                        <div class="ml-6 leading-6">Titulo del Proyecto:</div>
+                    </div>
+                    <div class="flex sm:items-center mt-8">
+                        <div class="font-semibold text-secondary">{{project?.title}}</div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="flex sm:items-center mt-8">
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:menu-alt-2'"></mat-icon>
+                        <div class="ml-6 leading-6">Descripcion del proyecto:</div>
+                    </div>
+
+                    <div class="mt-8">
+                        <span class="font-semibold text-secondary">{{project?.description}}</span> 
+                    </div>
+
+                    <!-- Description -->
+                    <div class="flex sm:items-center mt-8">
+                        <mat-icon class="icon-size-5" [svgIcon]="'feather:user-check'"></mat-icon>
+                        <div class="ml-6 leading-6">Organizador:</div>
+                    </div>
+
+                    <div class="mt-8">
+                        <span class="font-semibold text-secondary">{{project?.organizer.name}} {{project?.organizer.last_name}}</span> 
+                    </div>
+
+                    <!-- Target -->
+                    <div class="flex sm:items-center mt-8">
+                        <mat-icon class="icon-size-5" svgIcon="feather:target"></mat-icon>
+                        <div class="ml-6 leading-6">Fecha objetivo:</div>
+                    </div>
+                    <div class="flex sm:items-center mt-8">
+                        <div class="font-semibold text-secondary">{{project?.project_completion.target_completion}}</div>
+                    </div>
+
+                    <!-- Actual -->
+                    <ng-container *ngIf="project?.project_completion.actual_completion">
+                        <div class="flex sm:items-center mt-8">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:book-open'"></mat-icon>
+                            <div class="ml-6 leading-6">Fecha real:</div>
+                        </div>
+    
+                        <div class="mt-8">
+                            <span class="font-semibold text-secondary">{{project?.project_completion.actual_completion}}</span> 
+                        </div>
+                    </ng-container>
+
+                    <mat-list class="col-span-2 grid grid-cols-2 mt-8">
+                        <!-- Members -->
+                        <mat-divider class="col-span-2"></mat-divider>
+                        <div class="col-span-2 mx-auto text-xl" mat-subheader>
+                            Participantes
+                        </div>
+                        <mat-list-item *ngFor="let member of project.members">
+                            <mat-icon class="p-4 bg-primary-200 rounded-2xl text-warn-900 icon-size-5" matListItemIcon>person</mat-icon>
+                            <div class="ml-4 text-md" matListItemTitle>{{member.name}} {{member.last_name}}</div>
+                        </mat-list-item>
+                        <!-- Tasks -->
+                        <mat-divider class="col-span-2"></mat-divider>
+                        <div class="col-span-2 mx-auto text-xl" mat-subheader>
+                            Lista de Tareas del proyecto
+                            <button mat-icon-button [color]="'warn'" [routerLink]="['./tasks']">
+                                <span class="inline-flex items-center">
+                                    <mat-icon class="ml-1.5 icon-size-5">list</mat-icon>
+                                </span>
+                            </button>
+                        </div>
+                        <mat-list-item *ngFor="let task of project.tasks">
+                            <!-- FINISHED -->
+                            <ng-container *ngIf="(task.status|uppercase) === 'FINISHED'">
+                                <mat-icon class="icon-size-6 text-green-500" [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+                            </ng-container>
+                            <!-- IN PROGRESS -->
+                            <ng-container *ngIf="(task.status|uppercase) === 'IN_PROGRESS'">
+                                <mat-icon class="icon-size-6 text-blue-500">sync</mat-icon>
+                            </ng-container>
+                            <!-- UNFINISHED -->
+                            <ng-container *ngIf="(task.status|uppercase) === 'UNFINISHED'">
+                                <mat-icon class="icon-size-6 text-red-500" [svgIcon]="'heroicons_outline:x-circle'"></mat-icon>
+                            </ng-container>
+                            <div class="ml-4 text-md" matListItemTitle>{{task.title}}</div>
+                        </mat-list-item>
+                    </mat-list>
+                    <!-- Status -->
+                    <div class="col-span-2 flex items-center px-4 leading-9 rounded-full cursor-pointer h-12 mt-0 md:mt-5" 
+                        [ngClass]="{'text-green-800 bg-green-200 dark:text-green-100 dark:bg-green-500': (project.status|uppercase) === 'FINISHED',
+                                'text-indigo-800 bg-indigo-200 dark:text-indigo-100 dark:bg-indigo-500': (project.status|uppercase) === 'IN_PROGRESS', 
+                                'text-red-800 bg-red-200 dark:text-red-100 dark:bg-red-500': (project.status|uppercase) === 'UNFINISHED'}">
+                        <!-- FINISHED -->
+                        <ng-container *ngIf="(project.status|uppercase) === 'FINISHED'">
+                            <mat-icon class="icon-size-5 text-current" svgIcon="heroicons_solid:check-circle"></mat-icon>
+                            <span class="mx-auto text-md font-medium">COMPLETADO</span>
+                        </ng-container>
+
+                        <!-- IN_PROGRESS -->
+                        <ng-container *ngIf="(project.status|uppercase) === 'IN_PROGRESS'">
+                            <mat-icon class="icon-size-5 text-current" svgIcon="heroicons_solid:refresh"></mat-icon>
+                            <span class="mx-auto text-md font-medium">EN PROGRESO</span>
+                        </ng-container>
+
+                        <!-- UNFINISHED -->
+                        <ng-container *ngIf="(project.status|uppercase) === 'UNFINISHED'">
+                            <mat-icon class="icon-size-5 text-current" svgIcon="heroicons_solid:x-circle"></mat-icon>
+                            <span class="mx-auto text-md font-medium">SIN TERMINAR</span>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Edit mode -->
+    <ng-container *ngIf="editMode">
+        <!-- Header -->
+        <div class="flex items-center justify-between bg-primary-600 w-full h-20 p-6 pt-0 pb-0 sm:px-12">
+            <div class="flex items-center justify-center mx-auto">
+                <span class="text-white text-2xl font-semibold truncate text-center">
+                    {{ project.id === ''? 'REGISTRAR': 'EDITAR'}} PROYECTO
+                </span>
+            </div>
+            <div class="flex items-center">
+                <!-- Close button -->
+                <button mat-icon-button matTooltip="Cerrar" [routerLink]="['../']">
+                    <mat-icon class="text-white" svgIcon="heroicons_outline:x"></mat-icon>
+                </button>
+            </div>
+        </div>
+        <!-- Body -->
+        <div class="relative flex flex-col flex-auto items-center p-6 pt-0 sm:p-12 sm:pt-0">
+            <div class="w-full">
+                <form [formGroup]="projectForm">
+                    <!-- Title -->
+                    <div class="mt-8">
+                        <mat-form-field class="w-full">
+                            <mat-label>Titulo del proyecto</mat-label>
+                            <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:clipboard-list"></mat-icon>
+                            <input class="text-black" matInput [formControlName]="'title'">
+                            <mat-error *ngIf="projectForm.get('title').errors">
+                                {{matcher.getErrorMessage('title', projectForm)}}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="mt-4">
+                        <mat-form-field class="fuse-mat-textarea w-full ">
+                            <mat-label>Descripcion</mat-label>
+                            <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:menu-alt-2"></mat-icon>
+                            <textarea maxlength="250" placeholder="Descripcion" rows="3" matInput matTextareaAutosize [formControlName]="'description'" [spellcheck]="false" [errorStateMatcher]="matcher" #inputProjectDescription></textarea>
+                            <mat-error *ngIf="projectForm.get('description').errors">
+                                {{matcher.getErrorMessage('description', projectForm)}}
+                            </mat-error>
+                        </mat-form-field>
+                        <div class="text-right">
+                            <span class="font-extralight">{{inputProjectDescription.value.length}}/250</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <mat-form-field class="w-full">
+                            <mat-label>Organizador</mat-label>
+                            <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:clipboard-list"></mat-icon>
+                            <mat-select [formControlName]="'organizer'" #organizerSelector>
+                                <ng-container *ngIf="users$ | async as users">
+                                    <ng-container *ngFor="let user of users; trackBy: trackByFn">
+                                        <ng-container *ngIf="(user.status|lowercase) === 'active'">
+                                            <mat-option value="{{user.id}}">
+                                                <span class="ml-2 font-medium">{{user.name}} {{user.last_name}}</span>
+                                            </mat-option>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-container>
+                            </mat-select>
+                            <mat-error *ngIf="projectForm.get('organizer').errors">
+                                {{matcher.getErrorMessage('organizer', projectForm)}}
+                            </mat-error>
+                        </mat-form-field>
+                        <div class="flex-auto" formGroupName="project_completion">
+                            <mat-form-field class="w-full">
+                                <mat-label>Conclucion del proyecto</mat-label>
+                                <input  matInput [matDatepicker]="picker" [formControlName]="'target_completion'" (dateChange)="changeDate('target_completion', $event)" [errorStateMatcher]="matcher">
+                                <mat-hint>MM/DD/YYYY</mat-hint>
+                                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                <mat-datepicker #picker></mat-datepicker>
+                                <mat-error *ngIf="projectForm.get('project_completion').errors">
+                                    {{matcher.getErrorMessage('project_completion', projectForm)}}
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <!-- Icon -->
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <mat-form-field>
+                            <mat-label>Icono</mat-label>
+                            <mat-icon matPrefix class="hidden sm:flex icon-size-5 ">{{projectForm.get('icon').value}}</mat-icon>
+                            <mat-select [formControlName]="'icon'">
+                                <ng-container *ngFor="let icon of icons; trackBy: trackByFn">
+                                    <mat-option value="{{icon}}" class="text-center">
+                                        <mat-icon class="text-current" matListItemIcon>{{icon}}</mat-icon>
+                                    </mat-option>
+                                </ng-container>
+                            </mat-select>
+                            <mat-error *ngIf="projectForm.get('icon').errors">
+                                {{matcher.getErrorMessage('icon', projectForm)}}
+                            </mat-error>
+                        </mat-form-field>
+                        <!-- Status -->
+                        <div class="flex items-center px-4 leading-9 rounded-full cursor-pointer h-12 mt-0 md:mt-5 w-full md:w-2/3 mx-auto" 
+                            [ngClass]="{'text-green-800 bg-green-200 dark:text-green-100 dark:bg-green-500': (projectForm.get('status').value|uppercase) === 'FINISHED',
+                                    'text-indigo-800 bg-indigo-200 dark:text-indigo-100 dark:bg-indigo-500': (projectForm.get('status').value|uppercase) === 'IN_PROGRESS', 
+                                    'text-red-800 bg-red-200 dark:text-red-100 dark:bg-red-500': (projectForm.get('status').value|uppercase) === 'UNFINISHED'}" 
+                                        [matMenuTriggerFor]="statusMenu">
+                            <!-- FINISHED -->
+                            <ng-container *ngIf="(projectForm.get('status').value|uppercase) === 'FINISHED'">
+                                <mat-icon class="icon-size-5 text-current" svgIcon="heroicons_solid:check-circle"></mat-icon>
+                                <span class="mx-auto text-md font-medium">COMPLETADO</span>
+                            </ng-container>
+
+                            <!-- IN_PROGRESS -->
+                            <ng-container *ngIf="(projectForm.get('status').value|uppercase) === 'IN_PROGRESS'">
+                                <mat-icon class="icon-size-5 text-current" svgIcon="heroicons_solid:refresh"></mat-icon>
+                                <span class="mx-auto text-md font-medium">EN PROGRESO</span>
+                            </ng-container>
+
+                            <!-- UNFINISHED -->
+                            <ng-container *ngIf="(projectForm.get('status').value|uppercase) === 'UNFINISHED'">
+                                <mat-icon class="icon-size-5 text-current" svgIcon="heroicons_solid:x-circle"></mat-icon>
+                                <span class="mx-auto text-md font-medium">SIN TERMINAR</span>
+                            </ng-container>
+                        </div>
+                        <mat-menu #statusMenu="matMenu">
+                            <!-- accepted -->
+                            <button [ngClass]="{'bg-hover': (projectForm.get('status').value|uppercase) === 'FINISHED'}" mat-menu-item (click)="setStatus('FINISHED')">
+                                <span class="inline-flex items-center justify-between w-full min-w-30 leading-5">
+                                    <span class="font-medium">COMPLETADO</span>
+                                    <mat-icon class="mr-0 icon-size-4 text-green-600 dark:text-green-500"
+                                            svgIcon="heroicons_solid:check-circle"></mat-icon>
+                                </span>
+                            </button>
+                            <button [ngClass]="{'bg-hover': (projectForm.get('status').value|uppercase) === 'IN_PROGRESS'}" mat-menu-item (click)="setStatus('IN_PROGRESS')">
+                                <span class="inline-flex items-center justify-between w-full min-w-30 leading-5">
+                                    <span class="font-medium">EN PROGRESO</span>
+                                    <mat-icon class="mr-0 icon-size-4 text-blue-600 dark:text-blue-500"
+                                            svgIcon="heroicons_solid:refresh"></mat-icon>
+                                </span>
+                            </button>
+                            <!-- UNFINISHED -->
+                            <button [ngClass]="{'bg-hover': (projectForm.get('status').value|uppercase) === 'UNFINISHED'}" mat-menu-item (click)="setStatus('UNFINISHED')">
+                                <span class="inline-flex items-center justify-between w-full min-w-30 leading-5">
+                                    <span class="font-medium">SIN TERMINAR</span>
+                                    <mat-icon class="mr-0 icon-size-4 text-red-600 dark:text-red-500" 
+                                            svgIcon="heroicons_solid:x-circle"></mat-icon>
+                                </span>
+                            </button>
+                        </mat-menu>
+                    </div>
+                    <!-- Members -->
+                    <ng-container *ngIf="project.members">
+                        <div class="flex flex-col mt-4 pt-6 border-t space-y-4 pb-3">
+                            <mat-label class="font-medium">Participantes del proyecto</mat-label>
+                            <mat-error *ngIf="projectForm.get('members').errors">
+                                <span class="bg-red-50 p-3 rounded-2xl font-medium">
+                                    {{matcher.getErrorMessage('members', projectForm)}}!!  
+                                </span>
+                            </mat-error>
+                        </div>
+                        <div class="grid pt-1">
+                            <!-- Table Header -->
+                            <div class="grid-cols-2 z-10 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5">
+                                <div class="col-span-1 sm:col-span-2">
+                                    Nombre del participante
+                                </div>
+                            </div>
+
+                            <ng-container *ngFor="let detail of projectForm.get('members')['controls']">
+                                <div class="grid-cols-2 grid items-center gap-4 py-3 px-6 md:px-8 border-b" [ngClass]="{'text-gray-800 bg-gray-200 dark:text-gray-100 dark:bg-gray-500': selectedDetail?.key === detail.key}">
+                                    <!-- Item name -->
+                                    <div class="col-span-1">
+                                        {{detail.get('name').value}}  {{detail.get('last_name').value}}
+                                    </div>
+
+                                    <!-- Remove Detail -->
+                                    <div class="pl-10">
+                                        <button mat-icon-button matTooltip="Quitar" (click)="removeUserFromProject(detail.get('id').value)">
+                                            <mat-icon class="text-gray-600" svgIcon="heroicons_outline:trash"></mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2">
+                            <!-- Item Panel -->
+                            <div #usersPanelOrigin (click)="openUsersPanel()" class="flex items-center justify-center cursor-pointer py-1 px-3 mr-3 mb-3 hover:bg-gray-300 rounded-full bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                <ng-container *ngIf="!checkedUsers.length">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                    <span class="ml-2 font-medium text-secondary rounded-md">
+                                        Añadir
+                                    </span>
+                                </ng-container>
+                                <ng-container *ngIf="checkedUsers.length">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:pencil'"></mat-icon>
+                                    <span class="ml-2 font-medium text-secondary rounded-md">
+                                        Editar
+                                    </span>
+                                </ng-container>
+                                <ng-template #usersPanel>
+                                    <div class="w-72 rounded border shadow-md bg-card">
+                                        <div class="flex flex-col max-h-64 py-2 border-t overflow-y-auto">
+                                            <!-- Items Checkbox -->
+                                            <!-- Header -->
+                                            <div class="flex items-center -my-px py-2 px-3">
+                                                <div class="flex items-center flex-auto min-w-0">
+                                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                    <input class="min-w-0 ml-2 py-1 border-0" type="text" placeholder="Ingrese nombre del usuario" [maxLength]="50" (input)="filterUsers($event)" (keydown)="filterUsersInput($event)">
+                                                </div>
+                                            </div>
+                                            <!-- Available Items -->
+                                            <div class="h-44 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                                <!-- Items List -->
+                                                <ng-container>
+                                                    <ng-container *ngFor="let user of filteredUsers; trackBy: trackByFn">
+                                                        <mat-checkbox class="flex items-center h-10 min-h-10 px-4" [color]="'primary'" [checked]="checkedUsers.includes(user.id)" (change)="toggleProjectUsers(user, $event)">
+                                                            {{user.name}} {{user.last_name}}
+                                                        </mat-checkbox>
+                                                    </ng-container>
+                                                </ng-container>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </ng-container>
+                    <!-- Actions -->
+                    <div class="flex items-center mt-10 -mx-6 sm:-mx-12 py-4 pr-4 pl-1 sm:pr-12 sm:pl-7 border-t bg-gray-50 dark:bg-transparent">
+                        <!-- Delete -->
+                        <ng-container *ngIf="project.id != ''">
+                            <button mat-button color="warn" matTooltip="Eliminar" (click)="deleteProject()">
+                                Eliminar
+                            </button>
+                        </ng-container>
+                        <!-- Cancel -->
+                        <button class="ml-auto" mat-button matTooltip="Cancelar" (click)="toggleEditMode(false)">
+                            Cancelar
+                        </button>
+                        <!-- Save -->
+                        <button class="ml-2" mat-flat-button color="primary" [disabled]="projectForm.invalid" matTooltip="Guardar" (click)="saveProject()">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </ng-container>
+</div>

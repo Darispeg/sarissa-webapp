@@ -1,0 +1,18 @@
+.mat-slider-thumb {
+    background-color: #3f51b5 !important;
+    border: none !important;
+    box-shadow: 0px 0px 15px #000;
+    outline: 5px solid #fff;
+}
+
+.mat-slider-track-fill {
+    background-color: #3f51b5 !important;
+}
+
+.mat-slider-track-fill,
+.mat-slider-wrapper,
+.mat-slider-track-wrapper,
+.mat-slider-track-background {
+    height: 10px !important;
+    border-radius: 10px;
+}

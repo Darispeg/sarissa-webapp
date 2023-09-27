@@ -1,0 +1,448 @@
+<div class="flex flex-col w-full">
+    <!-- View mode -->
+    <ng-container *ngIf="!editMode">
+        <!-- Header -->
+        <div class="flex items-center justify-between w-full h-16 p-6 pt-0 pb-0 sm:px-12 dark:bg-accent-700">
+            <div class="flex items-center px-4 my-6 leading-9 rounded-2xl cursor-pointer h-10" 
+                [ngClass]="{'text-green-800 bg-green-200 dark:text-green-100 dark:bg-green-500': (task.status|uppercase) === 'FINISHED',
+                        'text-indigo-800 bg-indigo-200 dark:text-indigo-100 dark:bg-indigo-500': (task.status|uppercase) === 'IN_PROGRESS', 
+                        'text-red-800 bg-red-200 dark:text-red-100 dark:bg-red-500': (task.status|uppercase) === 'UNFINISHED'}">
+                <!-- FINISHED -->
+                <ng-container *ngIf="(task.status|uppercase) === 'FINISHED'">
+                    <mat-icon class="icon-size-5 text-current mr-3" svgIcon="heroicons_solid:check-circle"></mat-icon>
+                    <span class="mx-auto text-md font-medium">COMPLETADO</span>
+                </ng-container>
+
+                <!-- IN_PROGRESS -->
+                <ng-container *ngIf="(task.status|uppercase) === 'IN_PROGRESS'">
+                    <mat-icon class="icon-size-5 text-current  mr-3" svgIcon="heroicons_solid:refresh"></mat-icon>
+                    <span class="mx-auto text-md font-medium">EN PROGRESO</span>
+                </ng-container>
+
+                <!-- UNFINISHED -->
+                <ng-container *ngIf="(task.status|uppercase) === 'UNFINISHED'">
+                    <mat-icon class="icon-size-5 text-current  mr-3" svgIcon="heroicons_solid:x-circle"></mat-icon>
+                    <span class="mx-auto text-md font-medium">SIN TERMINAR</span>
+                </ng-container>
+            </div>
+            <div class="flex items-center">
+                <!-- More menu -->
+                <button mat-icon-button [matMenuTriggerFor]="moreMenu">
+                        <mat-icon class="text-hint" svgIcon="heroicons_outline:dots-vertical"></mat-icon>
+                </button>
+                <mat-menu #moreMenu="matMenu">
+                    <button mat-menu-item (click)="toggleEditMode(true)">
+                        <mat-icon svgIcon="heroicons_solid:pencil-alt"></mat-icon>
+                        <span class="ml-2">Editar tarea</span>
+                    </button>
+                    <button mat-menu-item>
+                            <mat-icon class="text-red-500" svgIcon="heroicons_outline:trash"></mat-icon>
+                            <span class="text-red-500">Eliminar tarea</span>
+                    </button>
+                </mat-menu>
+
+                <!-- Close button -->
+                <button mat-icon-button matTooltip="Cerrar" [routerLink]="['../']">
+                        <mat-icon class="text-hint" svgIcon="heroicons_outline:x"></mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <mat-divider class="py-4"></mat-divider>
+
+        <div class="relative flex flex-col flex-auto items-center p-6 pt-0 sm:p-12 sm:pt-0">
+            <div class="w-full max-w-5xl">     
+                <div class="grid grid-cols-2">
+                    <!-- Title -->
+                    <div class="flex sm:items-center col-span-2">
+                        <ng-container *ngIf="task.parent != null; else subTask">
+                            <mat-icon class="icon-size-7 text-blue-500" matTooltip="Incidencia: [Subtarea]">collections_bookmark</mat-icon>
+                        </ng-container>
+                        <ng-template #subTask>
+                            <mat-icon class="icon-size-7 text-green-500" matTooltip="Incidencia: [Tarea]">book</mat-icon>
+                        </ng-template>
+                        <div class="ml-6 font-semibold text-secondary text-3xl">{{task?.title}}</div>
+                    </div>
+
+                    <!-- Parent -->
+                    <ng-container *ngIf="task.parent != null">
+                        <div class="flex sm:items-center mt-8 col-span-2">
+                            <mat-icon class="icon-size-5 text-green-500" matTooltip="Incidencia: [Tarea]">book</mat-icon>
+                            <div class="ml-6 leading-6">
+                                Dependencia: 
+                                <a class="ml-6 text-blue-900 font-semibold italic cursor-pointer hover:text-blue-400" (click)="findIncidence(task?.parent)">
+                                    {{findTaskParent(task?.parent)}}
+                                </a>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Description -->
+                    <div class="flex sm:items-center mt-8 col-span-2">
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:menu-alt-2'"></mat-icon>
+                        <div class="ml-6 leading-6">{{task?.description}}</div>
+                    </div>
+
+                    <!-- Root cause -->
+                    <div class="flex sm:items-center mt-8">
+                        <mat-icon class="icon-size-5">spa</mat-icon>
+                        <div class="ml-6 leading-6">Causa raiz:</div>
+                    </div>
+                    <div class="flex sm:items-center mt-8">
+                        <div class="font-semibold text-secondary">{{task?.root_cause}}</div>
+                    </div>
+
+                    <!-- Source Origin -->
+                    <div class="flex sm:items-center mt-8">
+                        <mat-icon class="icon-size-5">info</mat-icon>
+                        <div class="ml-6 leading-6">Accion de origen:</div>
+                    </div>
+                    <div class="flex sm:items-center mt-8">
+                        <div class="font-semibold text-secondary">{{task?.source_action}}</div>
+                    </div>
+
+                    <!-- Target -->
+                    <div class="flex sm:items-center mt-8">
+                        <mat-icon class="icon-size-5" svgIcon="feather:target"></mat-icon>
+                        <div class="ml-6 leading-6">Fecha objetivo:</div>
+                    </div>
+                    <div class="flex sm:items-center mt-8">
+                        <div class="font-semibold text-secondary">{{task?.task_completion.target_completion}}</div>
+                    </div>
+
+                    <!-- Actual -->
+                    <ng-container *ngIf="task?.task_completion.actual_completion">
+                        <div class="flex sm:items-center mt-8">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:book-open'"></mat-icon>
+                            <div class="ml-6 leading-6">Fecha real:</div>
+                        </div>
+    
+                        <div class="mt-8">
+                            <span class="font-semibold text-secondary">{{task?.task_completion.actual_completion}}</span> 
+                        </div>
+                    </ng-container>
+
+                    <!-- Progress -->
+                    <div class="flex sm:items-center mt-8 col-span-2">
+                        <mat-icon class="icon-size-5">timelapse</mat-icon>
+                        <div class="leading-6 mx-5">Progreso: {{task.progress}} %</div>
+                        <mat-slider class="w-4/6"         
+                                    [max]="100"
+                                    [min]="0"
+                                    [disabled]="true"
+                                    value="{{task.progress}}" 
+                                    #slider matTooltip="{{slider.value}} %">
+                            <input matSliderThumb>
+                        </mat-slider>
+                    </div>
+
+                    <mat-list class="col-span-2 grid grid-cols-2 mt-8">
+                        <!-- Members -->
+                        <mat-divider class="col-span-2"></mat-divider>
+                        <div class="col-span-2 mx-auto text-xl" mat-subheader>
+                            Usuarios asignados
+                        </div>
+                        <mat-list-item *ngFor="let user of task.assigned_users">
+                            <mat-icon class="p-4 bg-blue-200 rounded-2xl text-blue-900 icon-size-5" matListItemIcon>person</mat-icon>
+                            <div class="ml-4 text-md" matListItemTitle>{{user.name}} {{user.last_name}}</div>
+                        </mat-list-item>
+                    </mat-list>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Edit Mode -->
+    <ng-container *ngIf="editMode">
+        <!-- Header -->
+        <div class="flex items-center justify-between w-full h-16 p-6 pt-0 pb-0 sm:px-12 dark:bg-accent-700">
+            <ng-container *ngIf="task.id != ''">
+                <div class="flex items-center px-4 my-6 leading-9 rounded-2xl cursor-pointer h-10" 
+                    [ngClass]="{'text-green-800 bg-green-200 dark:text-green-100 dark:bg-green-500': (taskForm.get('status').value|uppercase) === 'FINISHED',
+                            'text-indigo-800 bg-indigo-200 dark:text-indigo-100 dark:bg-indigo-500': (taskForm.get('status').value|uppercase) === 'IN_PROGRESS', 
+                            'text-red-800 bg-red-200 dark:text-red-100 dark:bg-red-500': (taskForm.get('status').value|uppercase) === 'UNFINISHED'}"
+                            [matMenuTriggerFor]="statusMenu">
+                    <!-- FINISHED -->
+                    <ng-container *ngIf="(taskForm.get('status').value|uppercase) === 'FINISHED'">
+                        <mat-icon class="icon-size-5 text-current mr-3" svgIcon="heroicons_solid:check-circle"></mat-icon>
+                        <span class="mx-auto text-md font-medium">COMPLETADO</span>
+                    </ng-container>
+
+                    <!-- IN_PROGRESS -->
+                    <ng-container *ngIf="(taskForm.get('status').value|uppercase) === 'IN_PROGRESS'">
+                        <mat-icon class="icon-size-5 text-current  mr-3" svgIcon="heroicons_solid:refresh"></mat-icon>
+                        <span class="mx-auto text-md font-medium">EN PROGRESO</span>
+                    </ng-container>
+
+                    <!-- UNFINISHED -->
+                    <ng-container *ngIf="(taskForm.get('status').value|uppercase) === 'UNFINISHED'">
+                        <mat-icon class="icon-size-5 text-current  mr-3" svgIcon="heroicons_solid:x-circle"></mat-icon>
+                        <span class="mx-auto text-md font-medium">SIN TERMINAR</span>
+                    </ng-container>
+                </div>
+                <mat-menu #statusMenu="matMenu">
+                    <!-- accepted -->
+                    <button [ngClass]="{'bg-hover': (taskForm.get('status').value|uppercase) === 'FINISHED'}" mat-menu-item (click)="setStatus('FINISHED')">
+                        <span class="inline-flex items-center justify-between w-full min-w-30 leading-5">
+                            <span class="font-medium">COMPLETADO</span>
+                            <mat-icon class="mr-0 icon-size-4 text-green-600 dark:text-green-500"
+                                    svgIcon="heroicons_solid:check-circle"></mat-icon>
+                        </span>
+                    </button>
+                    <button [ngClass]="{'bg-hover': (taskForm.get('status').value|uppercase) === 'IN_PROGRESS'}" mat-menu-item (click)="setStatus('IN_PROGRESS')">
+                        <span class="inline-flex items-center justify-between w-full min-w-30 leading-5">
+                            <span class="font-medium">EN PROGRESO</span>
+                            <mat-icon class="mr-0 icon-size-4 text-blue-600 dark:text-blue-500"
+                                    svgIcon="heroicons_solid:refresh"></mat-icon>
+                        </span>
+                    </button>
+                    <!-- UNFINISHED -->
+                    <button [ngClass]="{'bg-hover': (taskForm.get('status').value|uppercase) === 'UNFINISHED'}" mat-menu-item (click)="setStatus('UNFINISHED')">
+                        <span class="inline-flex items-center justify-between w-full min-w-30 leading-5">
+                            <span class="font-medium">SIN TERMINAR</span>
+                            <mat-icon class="mr-0 icon-size-4 text-red-600 dark:text-red-500" 
+                                    svgIcon="heroicons_solid:x-circle"></mat-icon>
+                        </span>
+                    </button>
+                </mat-menu>
+            </ng-container>
+            <div></div>
+            <div class="flex items-center">
+                <!-- Close button -->
+                <button mat-icon-button matTooltip="Cerrar" [routerLink]="['../']">
+                        <mat-icon class="text-hint" svgIcon="heroicons_outline:x"></mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Body -->
+        <div class="relative flex flex-col flex-auto items-center p-6 pt-0 sm:px-12 sm:pt-0">
+            <div class="w-full">
+                <form [formGroup]="taskForm">
+                    <!-- Title -->
+                    <div class="mt-4 flex items-center">
+                        <!-- Incidence -->
+                        <button mat-icon-button [matMenuTriggerFor]="incidenceMenu" class="mr-2">
+                            <ng-container *ngIf="incidence === 'task'; else subTask">
+                                <mat-icon class="text-green-500">book</mat-icon>
+                            </ng-container>
+                            <ng-template #subTask>
+                                <mat-icon class="text-blue-500">collections_bookmark</mat-icon>
+                            </ng-template>
+                        </button>
+                        <mat-menu #incidenceMenu="matMenu">
+                            <button mat-menu-item (click)="changeIncidence('task')">
+                                <mat-icon class="text-green-500">book</mat-icon>
+                                <span class="ml-2">Tarea</span>
+                            </button>
+                            <button mat-menu-item (click)="changeIncidence('subtask')">
+                                <mat-icon class="text-blue-500">collections_bookmark</mat-icon>
+                                <span>Subtarea</span>
+                            </button>
+                        </mat-menu>
+                        <mat-form-field class="w-full">
+                            <mat-label>Titulo de la tarea</mat-label>
+                            <input class="text-black" matInput [formControlName]="'title'">
+                            <mat-error *ngIf="taskForm.get('title').errors">
+                                {{matcher.getErrorMessage('title', taskForm)}}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <!-- Description -->
+                    <div class="mt-2">
+                        <mat-form-field class="fuse-mat-textarea w-full ">
+                            <mat-label>Descripcion</mat-label>
+                            <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:menu-alt-2"></mat-icon>
+                            <textarea maxlength="250" placeholder="Descripcion" rows="1" matInput matTextareaAutosize [formControlName]="'description'" [spellcheck]="false" [errorStateMatcher]="matcher" #inputTaskDescription></textarea>
+                            <mat-error *ngIf="taskForm.get('description').errors">
+                                {{matcher.getErrorMessage('description', taskForm)}}
+                            </mat-error>
+                        </mat-form-field>
+                        <div class="text-right">
+                            <span class="font-extralight">{{inputTaskDescription.value.length}}/250</span>
+                        </div>
+                    </div>
+                    <!-- Parent -->
+                    <ng-container *ngIf="incidence === 'subtask'">
+                        <div class="mt-2 flex items-center">
+                            <mat-form-field class="w-full col-span-2">
+                                <mat-label>Dependencia</mat-label>
+                                <mat-icon matPrefix class="icon-size-5 text-green-500">book</mat-icon>
+                                <mat-select [formControlName]="'parent'">
+                                    <ng-container *ngIf="tasks$ | async as tasks">
+                                        <ng-container *ngFor="let task of tasks; trackBy: trackByFn">
+                                            <mat-option value="{{task.id}}">
+                                                <span class="ml-2 font-medium">{{task.title}}</span>
+                                            </mat-option>
+                                        </ng-container>
+                                    </ng-container>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </ng-container>
+                    <!-- Dates -->
+                    <div class="grid grid-cols-2 gap-6">
+                        <mat-form-field class="w-full">
+                            <mat-label>Inicio</mat-label>
+                            <input  matInput [matDatepicker]="pickerStart" [formControlName]="'start_date'" (dateChange)="changeDate('start_date', $event)" [errorStateMatcher]="matcher">
+                            <mat-hint>MM/DD/YYYY</mat-hint>
+                            <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerStart></mat-datepicker>
+                            <mat-error *ngIf="taskForm.get('start_date').errors">
+                                {{matcher.getErrorMessage('start_date', taskForm)}}
+                            </mat-error>
+                        </mat-form-field>
+                        <div class="flex-auto" formGroupName="task_completion">
+                            <mat-form-field class="w-full">
+                                <mat-label>Conclusion</mat-label>
+                                <input  matInput [matDatepicker]="picker" [formControlName]="'target_completion'" (dateChange)="changeDateTaskCompletion('target_completion', $event)" [errorStateMatcher]="matcher">
+                                <mat-hint>MM/DD/YYYY</mat-hint>
+                                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                <mat-datepicker #picker></mat-datepicker>
+                                <mat-error *ngIf="taskForm.get('task_completion').errors">
+                                    {{matcher.getErrorMessage('task_completion', taskForm)}}
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <!-- Root Cause -->
+                    <div class="mt-2">
+                        <mat-form-field class="w-full">
+                            <mat-label>Causa raiz</mat-label>
+                            <mat-icon matPrefix class="hidden sm:flex icon-size-5 ">spa</mat-icon>
+                            <input class="text-black" matInput [formControlName]="'root_cause'">
+                            <mat-error *ngIf="taskForm.get('root_cause').errors">
+                                {{matcher.getErrorMessage('root_cause', taskForm)}}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <!-- Action Origin -->
+                    <div class="mt-2">
+                        <mat-form-field class="w-full">
+                            <mat-label>Accion de origen</mat-label>
+                            <mat-icon matPrefix class="hidden sm:flex icon-size-5 ">info</mat-icon>
+                            <input class="text-black" matInput [formControlName]="'source_action'">
+                            <mat-error *ngIf="taskForm.get('source_action').errors">
+                                {{matcher.getErrorMessage('source_action', taskForm)}}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <!-- Progress -->            
+                    <ng-container *ngIf="task.id != ''">
+                        <div class="flex sm:items-center mt-2">
+                            <mat-icon class="icon-size-5">timelapse</mat-icon>
+                            <div class="leading-6 mx-5">Progreso: {{taskForm.get('progress').value}} %</div>
+                            <mat-slider class="w-4/6"         
+                                        [max]="100"
+                                        [min]="0"
+                                        [step]="1"
+                                        [formControlName]="'progress'" #slider matTooltip="{{slider.value}} %">
+                                <input matSliderThumb>
+                            </mat-slider>
+                        </div>
+                    </ng-container>
+                    <!-- assigned users -->
+                    <ng-container *ngIf="task.assigned_users">
+                        <div class="flex flex-col mt-4 pt-6 border-t space-y-4 pb-3">
+                            <mat-label class="font-medium">Participantes del proyecto</mat-label>
+                            <mat-error *ngIf="taskForm.get('assigned_users').errors">
+                                <span class="bg-red-50 p-3 rounded-2xl font-medium">
+                                    {{matcher.getErrorMessage('assigned_users', taskForm)}}!!  
+                                </span>
+                            </mat-error>
+                        </div>
+                        <div class="grid pt-1">
+                            <!-- Table Header -->
+                            <div class="grid-cols-2 z-10 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5">
+                                <div class="col-span-1 sm:col-span-2">
+                                    Nombre del participante
+                                </div>
+                            </div>
+
+                            <ng-container *ngFor="let detail of taskForm.get('assigned_users')['controls']">
+                                <div class="grid-cols-2 grid items-center gap-4 py-3 px-6 md:px-8 border-b" [ngClass]="{'text-gray-800 bg-gray-200 dark:text-gray-100 dark:bg-gray-500': selectedDetail?.key === detail.key}">
+                                    <!-- Item name -->
+                                    <div class="col-span-1">
+                                        {{detail.get('name').value}}  {{detail.get('last_name').value}}
+                                    </div>
+
+                                    <!-- Remove Detail -->
+                                    <div class="pl-10">
+                                        <button mat-icon-button matTooltip="Quitar" (click)="removeUserFromTask(detail.get('id').value)">
+                                            <mat-icon class="text-gray-600" svgIcon="heroicons_outline:trash"></mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2">
+                            <!-- User Panel -->
+                            <div #usersPanelOrigin (click)="openUsersPanel()" class="flex items-center justify-center cursor-pointer py-1 px-3 mr-3 mb-3 hover:bg-gray-300 rounded-full bg-gray-100 dark:text-gray-300 dark:bg-gray-700">
+                                <ng-container *ngIf="!checkedUsers.length">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                                    <span class="ml-2 font-medium text-secondary rounded-md">
+                                        Añadir
+                                    </span>
+                                </ng-container>
+                                <ng-container *ngIf="checkedUsers.length">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:pencil'"></mat-icon>
+                                    <span class="ml-2 font-medium text-secondary rounded-md">
+                                        Editar
+                                    </span>
+                                </ng-container>
+                                <ng-template #usersPanel>
+                                    <div class="w-72 rounded border shadow-md bg-card">
+                                        <div class="flex flex-col max-h-64 py-2 border-t overflow-y-auto">
+                                            <!-- Users Checkbox -->
+                                            <!-- Header -->
+                                            <div class="flex items-center -my-px py-2 px-3">
+                                                <div class="flex items-center flex-auto min-w-0">
+                                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                                                    <input class="min-w-0 ml-2 py-1 border-0" type="text" placeholder="Ingrese nombre del usuario" [maxLength]="50" (input)="filterUsers($event)" (keydown)="filterUsersInput($event)">
+                                                </div>
+                                            </div>
+                                            <!-- Available Users -->
+                                            <div class="h-44 leading-none overflow-y-auto border-t border-gray-300 dark:border-gray-500">
+                                                <!-- Users List -->
+                                                <ng-container>
+                                                    <ng-container *ngFor="let user of filteredUsers; trackBy: trackByFn">
+                                                        <mat-checkbox class="flex items-center h-10 min-h-10 px-4" [color]="'primary'" [checked]="checkedUsers.includes(user.id)" (change)="toggleTaskUsers(user, $event)">
+                                                            {{user.name}} {{user.last_name}}
+                                                        </mat-checkbox>
+                                                    </ng-container>
+                                                </ng-container>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </ng-container>
+                    <!-- Actions -->
+                    <div class="flex items-center mt-10 -mx-6 sm:-mx-12 py-4 pr-4 pl-1 sm:pr-12 sm:pl-7 border-t bg-gray-50 dark:bg-transparent">
+                        <!-- Delete -->
+                        <ng-container *ngIf="task.id != ''; else updateTask">
+                            <button mat-button color="warn" matTooltip="Eliminar" (click)="deleteProject()">
+                                Eliminar
+                            </button>
+                            <button class="ml-auto" mat-button matTooltip="Cancelar" (click)="toggleEditMode(false)">
+                                Cancelar
+                            </button>
+                        </ng-container>
+                        <ng-template #updateTask>
+                            <button class="ml-auto" mat-button matTooltip="Cancelar"  [routerLink]="['../']">
+                                Cancelar
+                            </button>
+                        </ng-template>
+                        <!-- Save -->
+                        <button class="ml-2" mat-flat-button color="primary" [disabled]="taskForm.invalid" matTooltip="Guardar" (click)="saveTask()">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </ng-container>
+</div>

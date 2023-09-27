@@ -1,0 +1,257 @@
+<div class="flex flex-col w-full">
+    <!-- View mode -->
+    <ng-container *ngIf="!editMode">
+        <!-- Header -->
+        <div class="flex items-center justify-between bg-primary-900 w-full h-16 p-6 pt-0 pb-0 sm:px-12">
+            <div class="flex items-center justify-center">
+                <span class="font-medium text-white text-2xl truncate">Detalles del Usuario</span>
+            </div>
+            <div class="flex items-center">
+                <!-- More menu -->
+                <button mat-icon-button [matMenuTriggerFor]="moreMenu">
+                    <mat-icon class="text-white" svgIcon="heroicons_outline:dots-vertical"></mat-icon>
+                </button>
+                <mat-menu #moreMenu="matMenu">
+                    <button mat-menu-item (click)="toggleEditMode(true)">
+                        <mat-icon svgIcon="heroicons_solid:pencil-alt"></mat-icon>
+                        <span class="ml-2">Editar</span>
+                    </button>
+                    <mat-divider></mat-divider>
+                    <button mat-menu-item (click)="deleteArea()">
+                        <mat-icon class="text-red-500" svgIcon="heroicons_outline:trash"></mat-icon>
+                        <span class="text-red-500">Eliminar </span>
+                    </button>
+                </mat-menu>
+
+                <!-- Close button -->
+                <button mat-icon-button matTooltip="Cerrar" [routerLink]="['../']">
+                    <mat-icon class="text-white" svgIcon="heroicons_outline:x"></mat-icon>
+                </button>
+            </div>
+
+        </div>
+
+        <div class="relative flex flex-col flex-auto items-center p-6 pt-0 sm:p-12 sm:pt-0">
+            <div class="w-full max-w-3xl">
+
+                <!-- Name -->
+                <div class="mt-3 text-4xl font-bold truncate">{{user.name}} {{user.last_name}}</div>
+
+                <div class="flex flex-col mt-4 pt-6 border-t space-y-8">
+                    <!-- Code -->
+                    <div class="flex sm:items-center">
+                        <mat-icon svgIcon="heroicons_outline:identification"></mat-icon>
+                        <div class="ml-6 leading-6">{{user?.ci}}</div>
+                    </div>
+                    <!-- Name -->
+                    <div class="flex sm:items-center">
+                        <mat-icon svgIcon="heroicons_outline:user"></mat-icon>
+                        <div class="ml-6 leading-6">{{user?.name}} {{user.last_name}}</div>
+                    </div>
+                    <!-- Email -->
+                    <div class="flex">
+                        <mat-icon svgIcon="heroicons_outline:mail"></mat-icon>
+                        <div class="max-w-none ml-6 prose prose-sm">{{user?.email}}</div>
+                    </div>
+                    <!-- Code -->
+                    <div class="flex sm:items-center">
+                        <mat-icon svgIcon="heroicons_outline:phone"></mat-icon>
+                        <div class="ml-6 leading-6">{{user?.phone}}</div>
+                    </div>
+                    <!-- Position -->
+                    <div class="flex">
+                        <mat-icon svgIcon="heroicons_outline:briefcase"></mat-icon>
+                        <div class="max-w-none ml-6 prose prose-sm">{{user?.position}}</div>
+                    </div>
+                    <!-- Birthday -->
+                    <ng-container *ngIf="user.birthday">
+                        <div class="flex">
+                            <mat-icon svgIcon="heroicons_outline:cake"></mat-icon>
+                            <div class="max-w-none ml-6 prose prose-sm">{{user.birthday}}</div>
+                        </div>
+                    </ng-container>
+                    <!-- Status -->
+                    <div class="flex" [ngClass]="{'text-green-800 dark:text-green-100': (user.status|lowercase) === 'active',
+                                                'text-red-800 dark:text-red-100': (user.status|lowercase) === 'inactive'}">
+                        <ng-container *ngIf="(user.status | lowercase) === 'active'; else inactive">
+                            <mat-icon class="text-current" svgIcon="heroicons_solid:check-circle"></mat-icon>
+                            <span class="ml-6 leading-6 text-md font-medium">ACTIVO</span>
+                        </ng-container>
+                        <ng-template #inactive>
+                            <mat-icon class="text-current" svgIcon="heroicons_solid:x-circle"></mat-icon>
+                            <span class="ml-6 leading-6 text-md font-medium">INACTIVO</span> 
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="editMode">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between bg-primary-900 w-full h-16 px-8 sm:px-12">
+            <div class="flex items-center justify-center">
+                <span class="font-medium text-white text-2xl">
+                    {{ user.id === ''? 'Registrar': 'Editar'}} usuario
+                </span>
+            </div>
+            <div class="flex items-center">
+                <!-- Close button -->
+                <button mat-icon-button matTooltip="Cerrar" [routerLink]="['../']">
+                    <mat-icon class="text-white" svgIcon="heroicons_outline:x"></mat-icon>
+                </button>
+            </div>
+
+        </div>
+
+        <div class="relative flex flex-col flex-auto items-center p-6 pt-0 pb-0 sm:p-12 sm:pt-0">
+            <div class="w-full max-w-3xl">
+                <form [formGroup]="userForm">
+                    <div class="flex flex-wrap justify-between">
+                        <!--CI-->
+                        <div class="mt-8 flex-auto" [ngClass]="{'mr-8': user.id}">
+                            <mat-form-field class="fuse-mat-no-subscript w-full ">
+                                <mat-label>Doc. Identificacion</mat-label>
+                                <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:identification"></mat-icon>
+                                <input matInput [formControlName]="'ci'" placeholder="Documento Identidicacion" [spellcheck]="false">
+                            </mat-form-field>
+                        </div>
+                        <!-- Status -->
+                        <div class="mt-8" *ngIf="user.id">
+                            <mat-label class="font-medium">Estado</mat-label>
+                            <div class="flex items-center mt-1.5 px-6 leading-10 rounded-full cursor-pointer" [ngClass]="{'text-green-800 bg-green-200 dark:text-green-100 dark:bg-green-500': (userForm.get('status').value|uppercase) === 'ACTIVE',
+                                             'text-red-800 bg-red-200 dark:text-red-100 dark:bg-red-500': (userForm.get('status').value|uppercase) === 'INACTIVE'}" [matMenuTriggerFor]="statusMenu">
+
+                                <!-- Activo -->
+                                <ng-container *ngIf="(userForm.get('status').value|uppercase) === 'ACTIVE'">
+                                    <mat-icon class="icon-size-5 text-current" svgIcon="heroicons_solid:check-circle"></mat-icon>
+                                    <span class="ml-2 mr-1 text-md font-medium">Activo</span>
+                                </ng-container>
+
+                                <!-- Inactivo -->
+                                <ng-container *ngIf="(userForm.get('status').value|uppercase) === 'INACTIVE'">
+                                    <mat-icon class="icon-size-4 text-current" svgIcon="heroicons_solid:x-circle"></mat-icon>
+                                    <span class="ml-2 mr-1 text-md font-medium">Inactivo</span>
+                                </ng-container>
+                            </div>
+                            <mat-menu #statusMenu="matMenu">
+                                <!-- Activo -->
+                                <button [ngClass]="{'bg-hover': (userForm.get('status').value|uppercase) === 'ACTIVE'}" mat-menu-item (click)="setStatus('ACTIVE')">
+                                    <span class="inline-flex items-center justify-between w-full min-w-30 leading-5">
+                                        <span class="font-medium">Activo</span>
+                                        <mat-icon class="mr-0 icon-size-4 text-green-600 dark:text-green-500"
+                                                  svgIcon="heroicons_solid:check-circle"></mat-icon>
+                                    </span>
+                                </button>
+                                <!-- Inactivo -->
+                                <button [ngClass]="{'bg-hover': (userForm.get('status').value|uppercase) === 'INACTIVE'}" mat-menu-item (click)="setStatus('INACTIVE')">
+                                    <span class="inline-flex items-center justify-between w-full min-w-30 leading-5">
+                                        <span class="font-medium">Inactivo</span>
+                                        <mat-icon class="mr-0 icon-size-4 text-red-600 dark:text-red-500"
+                                                  svgIcon="heroicons_solid:x-circle"></mat-icon>
+                                    </span>
+                                </button>
+                            </mat-menu>
+                        </div>
+                    </div>
+
+                    <!-- Name -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="mt-8">
+                            <mat-form-field class="fuse-mat-no-subscript w-full ">
+                                <mat-label>Nombres</mat-label>
+                                <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:user"></mat-icon>
+                                <input matInput [formControlName]="'name'" placeholder="Nombres" [spellcheck]="false">
+                            </mat-form-field>
+                        </div>
+                        <div class="md:mt-8">
+                            <mat-form-field class="fuse-mat-no-subscript w-full ">
+                                <mat-label>Apellidos</mat-label>
+                                <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:user"></mat-icon>
+                                <input matInput [formControlName]="'last_name'" placeholder="Apellidos" [spellcheck]="false">
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <!-- Email -->
+                    <div class="mt-8">
+                        <mat-form-field class="fuse-mat-no-subscript w-full ">
+                            <mat-label>Correo</mat-label>
+                            <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:mail"></mat-icon>
+                            <input matInput [formControlName]="'email'" placeholder="Correo electronico" [spellcheck]="false">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Phone -->
+                        <div class="mt-8">
+                            <mat-form-field class="fuse-mat-no-subscript w-full ">
+                                <mat-label>Telefono</mat-label>
+                                <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:phone"></mat-icon>
+                                <input matInput [formControlName]="'phone'" placeholder="Telefono" [spellcheck]="false">
+                            </mat-form-field>
+                        </div>
+                        <!-- Birthday -->
+                        <div class="md:mt-8 flex-auto">
+                            <mat-form-field class="w-full">
+                                <mat-label>Fecha de nacimiento</mat-label>
+                                <input readonly [formControlName]="'birthday'" matInput [matDatepicker]="pickerBirthday" (dateChange)="changeDate('birthday', $event)">
+                                <mat-hint>MM/DD/YYYY</mat-hint>
+                                <mat-datepicker-toggle matSuffix [for]="pickerBirthday"></mat-datepicker-toggle>
+                                <mat-datepicker #pickerBirthday></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- Position -->
+                    <div class="mt-2">
+                        <mat-form-field class="fuse-mat-no-subscript w-full ">
+                            <mat-label>Posicion</mat-label>
+                            <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:briefcase"></mat-icon>
+                            <input matInput [formControlName]="'position'" placeholder="Posicion de trabajo" [spellcheck]="false">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Password -->
+                        <div class="mt-8">
+                            <mat-form-field class="fuse-mat-no-subscript w-full ">
+                                <mat-label>Contraseña</mat-label>
+                                <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:eye"></mat-icon>
+                                <input type="password" matInput [formControlName]="'password'" placeholder="Posicion de trabajo" [spellcheck]="false">
+                            </mat-form-field>
+                        </div>
+
+                        <!-- ROLE -->
+                        <div class="md:mt-8">
+                            <mat-form-field class="fuse-mat-no-subscript w-full ">
+                                <mat-label>Rol de usuario</mat-label>
+                                <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:key"></mat-icon>
+                                <input matInput [formControlName]="'role'" placeholder="rol de usuario" [spellcheck]="false">
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center mt-10 -mx-6 sm:-mx-12 py-4 pr-4 pl-1 sm:pr-12 sm:pl-7 border-t bg-gray-50 dark:bg-transparent">
+                        <!-- Delete -->
+                        <ng-container *ngIf="user.id != ''">
+                            <button mat-button color="warn" matTooltip="Eliminar" (click)="deleteUser()">
+                                Eliminar
+                            </button>
+                        </ng-container>
+                        <!-- Cancel -->
+                        <button class="ml-auto" mat-button matTooltip="Cancelar" (click)="toggleEditMode(false)">
+                            Cancelar
+                        </button>
+                        <!-- Save -->
+                        <button class="ml-2" mat-flat-button color="primary" [disabled]="userForm.invalid" matTooltip="Guardar" (click)="saveUser()">
+                            Guardar
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </ng-container>
+</div>

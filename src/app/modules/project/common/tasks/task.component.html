@@ -1,0 +1,114 @@
+<div class="flex flex-col flex-auto min-w-0 overflow-hidden">
+    <mat-drawer-container class="flex-auto w-full h-192 dark:bg-transparent">
+        <mat-drawer class="w-full sm:w-160 dark:bg-gray-900" [mode]="drawerTaskMode" [opened]="false" [position]="'end'" [disableClose]="true" #matDrawerTask>
+            <router-outlet></router-outlet>
+        </mat-drawer>
+
+        <mat-drawer-content class="flex flex-col">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:py-8 sm:px-10 border-b dark:bg-transparent">
+                <div class="flex-1 min-w-0">
+                    <!-- Breadcrumbs -->
+                    <div class="flex flex-wrap items-center font-medium">
+                        <div>
+                            <a class="whitespace-nowrap text-primary-500">Proyectos</a>
+                        </div>
+                        <div class="flex items-center ml-1 whitespace-nowrap">
+                            <mat-icon
+                                class="icon-size-5 text-secondary"
+                                [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                            <a class="ml-1 text-primary-500">Informacion</a>
+                        </div>
+                        <div class="flex items-center ml-1 whitespace-nowrap">
+                            <mat-icon
+                                class="icon-size-5 text-secondary"
+                                [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                            <span class="ml-1 text-secondary">Tareas</span>
+                        </div>
+                    </div>
+                    <!-- Title -->
+                    <div class="mt-2">
+                        <h2 class="text-3xl md:text-3xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                            {{project.title}}
+                        </h2>
+                    </div>
+                    <div class="mt-2">
+                        <div class="flex flex-col sm:flex-row text-hint">
+                            <div class="flex items-center p-2">
+                                <mat-icon class="p-3 bg-green-200 rounded-2xl text-green-900 icon-size-3" matListItemIcon>check</mat-icon>
+                                <div class="ml-4 text-md" matListItemTitle>Completas => {{tasksCount.completed}}</div>
+                            </div>
+                            <div class="flex items-center p-2">
+                                <mat-icon class="p-3 bg-blue-200 rounded-2xl text-blue-900 icon-size-3" matListItemIcon>sync</mat-icon>
+                                <div class="ml-4 text-md" matListItemTitle>En progreso => {{tasksCount.inProgress}}</div>
+                            </div>
+                            <div class="flex items-center p-2">
+                                <mat-icon class="p-3 bg-red-200 rounded-2xl text-red-900 icon-size-3" matListItemIcon>clear</mat-icon>
+                                <div class="ml-4 text-md" matListItemTitle>Pendientes => {{tasksCount.incomplete}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Add Task Button -->
+                <button class="sm:ml-4 w-full sm:w-44 mr-10 sm:mt-0 mt-5" mat-stroked-button [color]="'primary'"  (click)="createTask()">
+                    <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                    <span class="ml-2 mr-1">Agregar Tarea</span>
+                </button>
+                <button
+                    class="-ml-3 sm:ml-0 mb-2 sm:mb-0 order-first sm:order-last"
+                    mat-icon-button
+                    (click)="toggleDrawer()">
+                    <mat-icon [svgIcon]="'heroicons_outline:menu'"></mat-icon>
+                </button>
+            </div>
+            <div class="relative bg-card">
+                <!-- Tasks -->
+                <ng-container *ngIf="tasks$ | async as tasks">
+                    <ng-container *ngIf="tasks.length; else empty">
+                        <ng-container *ngFor="let task of tasks;">
+                            <!-- Purchase -->
+                            <a class="z-20 flex items-center px-6 py-4 md:px-8 cursor-pointer border-b hover:bg-gray-100" [ngClass]="{'hover:bg-gray-100': !selectedTask || selectedTask.id !== task.id,
+                            'bg-primary-50' : selectedTask && selectedTask.id === task.id}" [routerLink]="['./', task.id]"> 
+                                <div class="flex flex-0 items-center justify-center w-7 h-7 rounded-full overflow-hidden">
+                                    <div class="flex items-center justify-center w-full h-full rounded-full" [ngClass]="{'text-green-800 bg-green-200 dark:text-green-100 dark:bg-green-500': (task.status|uppercase) === 'FINISHED',
+                                    'text-red-800 bg-red-200 dark:text-red-100 dark:bg-red-500': (task.status|uppercase) === 'UNFINISHED', 
+                                    'text-blue-800 bg-blue-200 dark:text-blue-100 dark:bg-blue-500': (task.status|uppercase) === 'IN_PROGRESS'}">
+                                        <!-- Aceptado -->
+                                        <ng-container *ngIf="(task.status|uppercase) === 'FINISHED'">
+                                            <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                        </ng-container>
+                                        <!-- En progreso -->
+                                        <ng-container *ngIf="(task.status|uppercase) === 'IN_PROGRESS'">
+                                            <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+                                        </ng-container>
+                                        <!-- Rechazado -->
+                                        <ng-container *ngIf="(task.status|uppercase) === 'UNFINISHED'">
+                                            <mat-icon class="icon-size-4 text-current" [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                                <!-- Details of the list -->
+                                <div class="min-w-0 ml-4 grid grid-cols-1 md:grid-cols-4 w-full">
+                                    <div class="flex sm:items-center">
+                                        <span class="font-semibold dark:text-hint">{{task.title}}</span> 
+                                        <mat-icon class="icon-size-5 text-hint">:</mat-icon>
+                                    </div>
+                                    <div class="col-span-3">
+                                        <span class="text-hint">{{task.description}}</span> 
+                                    </div>
+                                </div>
+                            </a>
+                        </ng-container>
+                    </ng-container>
+                </ng-container>
+                <!-- No Records -->
+                <ng-template #empty>
+                    <div class="flex items-center justify-center dark:bg-transparent my-24">
+                        <mat-icon class="icon-size-20" svgIcon="iconsmind:file_search"></mat-icon>
+                        <div class="mt-6 text-2xl font-semibold tracking-tight text-secondary">Sin Tareas</div>
+                    </div>
+                </ng-template>
+            </div> 
+        </mat-drawer-content>
+    </mat-drawer-container>
+</div>

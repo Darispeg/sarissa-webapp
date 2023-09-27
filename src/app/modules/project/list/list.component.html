@@ -1,0 +1,140 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
+    <mat-drawer-container class="flex-auto h-full dark:bg-transparent" (backdropClick)="onBackdropClicked()">
+        <mat-drawer class="w-full md:w-192 dark:bg-gray-900" [mode]="drawerMode" [opened]="false" [position]="'end'" [disableClose]="true" #matDrawer>
+            <router-outlet></router-outlet>
+        </mat-drawer>
+
+        <mat-drawer-content class="flex flex-col">
+            <!-- Header -->
+            <div class="relative flex-0 py-8 px-4 sm:p-16 overflow-hidden bg-gray-800 dark">
+                <!-- Background - @formatter:off -->
+                <!-- Rings -->
+                <svg class="absolute inset-0 pointer-events-none"
+                        viewBox="0 0 960 540" width="100%" height="100%" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+                    <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
+                        <circle r="234" cx="196" cy="23"></circle>
+                        <circle r="234" cx="790" cy="491"></circle>
+                    </g>
+                </svg>
+                <!-- @formatter:on -->
+                <div class="z-10 relative flex flex-col items-center">
+                    <div class="mt-1 text-4xl sm:text-2xl font-extrabold tracking-tight leading-tight text-center">
+                        ADMINISTRACION Y CONTROL DE PROYECTOS SARISSA
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main -->
+            <div class="flex flex-auto p-6 sm:p-10">
+                <div class="flex flex-col flex-auto w-full max-w-xs sm:max-w-5xl mx-auto">
+                    <!-- Filters -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between w-full max-w-xs sm:max-w-none">
+                        <mat-form-field class="fuse-mat-no-subscript w-full sm:w-72 mt-4 sm:mt-0 sm:ml-4 pb-8 sm:pb-0" [floatLabel]="'always'">
+                            <mat-icon matPrefix class="icon-size-5" [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                            <input [formControl]="searchInputControl" [autocomplete]="'off'" placeholder="Buscar por titulo" matInput #query>
+                        </mat-form-field>
+                        <!-- Add Project Button -->
+                        <button class="sm:ml-4 w-full sm:w-44" mat-stroked-button [color]="'primary'" (click)="createProject()">
+                            <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                            <span class="ml-2 mr-1">Nuevo Proyecto</span>
+                        </button>
+                    </div>
+                    <!-- Loader -->
+                    <div class="inset-x-0 bottom-0" *ngIf="isLoading">
+                        <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
+                    </div>
+                    <!-- Projects -->
+                    <ng-container *ngIf="projects$ | async as projects">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 sm:mt-10"
+                            [ngClass]="{'lg:grid-cols-2': matDrawer.opened === true,
+                            'lg:grid-cols-3': matDrawer.opened != true}">
+                            <ng-container *ngFor="let project of projects;">
+                                <ng-container *ngIf="project != null">
+                                    <a class="flex flex-col h-120 shadow-2xl rounded-2xl overflow-hidden bg-card px-8 pt-4 cursor-pointer"
+                                        [ngClass]="{'hover:bg-indigo-50 dark:hover:bg-indigo-600': !selectedProject || selectedProject.id !== project.id,
+                                                    'bg-indigo-50 dark:bg-indigo-600' : selectedProject && selectedProject.id === project.id}">
+                                        <div class="text-right">
+                                            <mat-icon *ngIf="(project.status|uppercase) === 'FINISHED'" class="icon-size-4 text-white bg-green-600 rounded-xl p-3" [matTooltip]="'Completado'">
+                                                check
+                                            </mat-icon>
+                                            <mat-icon *ngIf="(project.status|uppercase) === 'IN_PROGRESS'" class="icon-size-4 text-white bg-blue-600 rounded-xl p-3" [matTooltip]="'En progreso'">
+                                                refresh
+                                            </mat-icon>
+                                            <mat-icon *ngIf="(project.status|uppercase) === 'UNFINISHED'" class="icon-size-4 text-white bg-red-600 rounded-xl p-3" [matTooltip]="'Sin terminar'">
+                                                clear
+                                            </mat-icon>
+                                        </div>
+                                        <div class="mx-auto flex items-center justify-center p-5 rounded-full 
+                                                    text-primary-900 dark:text-on-primary"
+                                                    [ngClass]="{'bg-primary-200 dark:bg-primary-500': !selectedProject || selectedProject.id !== project.id,
+                                                    'bg-card' : selectedProject && selectedProject.id === project.id}">
+                                            <mat-icon class="icon-size-10 text-current" matListItemIcon>{{project.icon}}</mat-icon>
+                                        </div>
+                                        <!-- Title -->
+                                        <div class="mt-5 text-lg font-medium leading-5">{{project?.title}}</div>
+                                        <!-- Members -->
+                                        <ng-container *ngIf="project.members?.length">
+                                            <div class="w-32 h-1 mt-6 border-t-2"></div>
+                                            <div class="flex items-center mt-8 -space-x-1.5">
+                                                <ng-container *ngFor="let member of project.members.slice(0, 5); trackBy: trackByFn">
+                                                    <div class="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden uppercase 
+                                                                ring ring-offset-1 ring-bg-card ring-offset-transparent
+                                                                text-xl font-bold leading-none bg-blue-100 text-gray-600 
+                                                                                                dark:bg-blue-700 dark:text-gray-200"
+                                                        matTooltip="{{member.name}} {{member.last_name}}">
+                                                        {{member.last_name.charAt(0)}}
+                                                    </div>
+                                                </ng-container>
+                                                <ng-container *ngIf="project.members?.length > 5">
+                                                    <div class="flex flex-0 items-center justify-center w-8 h-8 rounded-full ring ring-offset-1 ring-bg-card ring-offset-transparent bg-gray-200 text-gray-500">
+                                                        <div class="text-md font-semibold">
+                                                            +{{ project.members.slice(5).length }}
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                            </div>
+                                        </ng-container>
+                                        <!-- Last activity -->
+                                        <div class="flex items-center mt-4 text-md font-md">
+                                            <div class="text-secondary">Editado:</div>
+                                            <div class="ml-1">{{formatDateAsRelative(project?.modified)}}</div>
+                                        </div>
+                                        <div class="flex items-center mt-2 text-md font-md">
+                                            <div class="text-secondary">Conclusion:</div>
+                                            <div class="ml-1">{{project.project_completion?.target_completion}}</div>
+                                        </div>
+                                        <button class="mt-5 bg-red-500 rounded-3xl h-10 text-white 
+                                                    hover:bg-red-200 hover:text-red-700 border-2 hover:border-red-700"
+                                            [routerLink]="['./', project.id]">
+                                            <span class="inline-flex items-center mt-1">
+                                                <mat-icon class="mr-1.5 icon-size-5 text-current">next_week</mat-icon>
+                                                <span>Informacion del proyecto</span>
+                                            </span>
+                                        </button>
+                                        <button class="mt-5 bg-orange-400 rounded-3xl h-10 text-white 
+                                                    hover:bg-orange-200 hover:text-orange-700 border-2 hover:border-orange-700"
+                                                    (click)="openProject(project.id)">
+                                            <span class="inline-flex items-center mt-1">
+                                                <mat-icon class="mr-1.5 icon-size-5 text-current">assignment</mat-icon>
+                                                <span>Ver Proyecto</span>
+                                            </span>
+                                        </button>
+                                    </a>
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                    <!-- No courses -->
+                    <ng-template #noCourses>
+                        <div class="flex flex-auto flex-col items-center justify-center bg-gray-100 dark:bg-transparent">
+                            <mat-icon
+                                class="icon-size-20"
+                                [svgIcon]="'iconsmind:file_search'"></mat-icon>
+                            <div class="mt-6 text-2xl font-semibold tracking-tight text-secondary">Sin proyectos encontrados!</div>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+        </mat-drawer-content>
+    </mat-drawer-container>
+</div>
