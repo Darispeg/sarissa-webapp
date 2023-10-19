@@ -44,11 +44,11 @@ export class CommonsComponent implements OnInit, OnDestroy
                         icon : 'feather:target',
                     },
                     {
-                        id   : 'project.common.boards',
-                        title: 'Tablero',
+                        id   : 'project.common.solutions',
+                        title: 'Analisis',
                         type : 'basic',
-                        link : '../info/common/boards',
-                        icon : 'heroicons_solid:view-boards',
+                        link : '../info/common/solutions',
+                        icon : 'heroicons_solid:presentation-chart-line',
                     },
                     {
                         id   : 'project.common.gantt',

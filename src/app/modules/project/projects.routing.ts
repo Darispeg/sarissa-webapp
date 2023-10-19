@@ -12,6 +12,10 @@ import { TaskDetailsResolver, TaskListResolver } from "./common/tasks/task.resol
 import { TaskDetailsComponent } from "./common/tasks/tasks-details/details-task.component";
 import { CanDeactivateTaskDetails } from "./common/tasks/tasks.guard";
 import { GanttComponent } from "./common/gantt/gantt.component";
+import { SolutionsComponent } from "./common/solutions/solutions.component";
+import { SolutionDetailsResolver, SolutionListResolver } from "./common/solutions/solutions.resolver";
+import { SolutionDetailsComponent } from "./common/solutions/solution-details/details.componen";
+import { CanDeactivateSolutionDetails } from "./common/solutions/solutions.guard";
 
 
 export const projectRoutes: Route[] = [
@@ -67,6 +71,23 @@ export const projectRoutes: Route[] = [
                                             task : TaskDetailsResolver
                                         },
                                         canDeactivate : [CanDeactivateTaskDetails],
+                                    }
+                                ]
+                            },
+                            {
+                                path     : 'solutions',
+                                component: SolutionsComponent,
+                                resolve     : {
+                                    tasks : SolutionListResolver
+                                },
+                                children    : [
+                                    {
+                                        path    : ':idSolution',
+                                        component : SolutionDetailsComponent,
+                                        resolve     : {
+                                            task : SolutionDetailsResolver
+                                        },
+                                        canDeactivate : [CanDeactivateSolutionDetails],
                                     }
                                 ]
                             },

@@ -1,0 +1,407 @@
+<div class="flex flex-col w-full">
+    <!-- View mode -->
+    <ng-container *ngIf="!editMode">
+        <!-- Header -->
+        <div class="flex items-center justify-between w-full h-16 p-6 pt-0 pb-0 sm:px-12 dark:bg-accent-700">
+            <div class="flex items-center px-4 my-6 leading-9 rounded-2xl cursor-pointer h-10">
+                <span class="text-3xl italic font-semibold">Detalles del problema</span>
+            </div>
+            <div class="flex items-center">
+                <!-- More menu -->
+                <button mat-icon-button [matMenuTriggerFor]="moreMenu">
+                        <mat-icon class="text-hint" svgIcon="heroicons_outline:dots-vertical"></mat-icon>
+                </button>
+                <mat-menu #moreMenu="matMenu">
+                    <button mat-menu-item (click)="toggleEditMode(true)">
+                        <mat-icon svgIcon="heroicons_solid:pencil-alt"></mat-icon>
+                        <span class="ml-2">Editar solucion</span>
+                    </button>
+                    <button mat-menu-item>
+                            <mat-icon class="text-red-500" svgIcon="heroicons_outline:trash"></mat-icon>
+                            <span class="text-red-500">Eliminar solucion</span>
+                    </button>
+                </mat-menu>
+
+                <!-- Close button -->
+                <button mat-icon-button matTooltip="Cerrar" [routerLink]="['../']">
+                        <mat-icon class="text-hint" svgIcon="heroicons_outline:x"></mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <mat-divider class="py-4"></mat-divider>
+
+        <div class="relative flex flex-col flex-auto items-center p-6 pt-0 sm:p-12 sm:pt-0">
+            <div class="w-full max-w-5xl">     
+                <div class="grid grid-cols-2">
+                    <!-- Title -->
+                    <div class="flex sm:items-center col-span-2">
+                        <mat-icon class="icon-size-7 text-blue-800">bug_report</mat-icon>
+                        <div class="ml-6 font-semibold text-secondary text-3xl">{{solution?.title}}</div>
+                    </div>
+
+                    <!-- Trigger -->
+                    <ng-container *ngIf="solution?.created">
+                        <div class="flex sm:items-center mt-4">
+                            <mat-icon class="icon-size-5 text-red-500">gps_fixed</mat-icon>
+                            <div class="ml-6 leading-6">Disparador:</div>
+                        </div>
+                        <div class="mt-4">
+                            <a class="text-blue-900 font-semibold italic cursor-pointer text-xl">
+                                {{solution.trigger}}
+                            </a>
+                        </div>
+                    </ng-container>
+
+                    <!-- Trigger -->
+                    <ng-container *ngIf="solution?.created">
+                        <div class="flex sm:items-center mt-4">
+                            <mat-icon class="icon-size-5">thumb_up</mat-icon>
+                            <div class="ml-6 leading-6">Calificacion:</div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-green-900 font-semibold italic text-xl">
+                                {{calculateCalification()}}/5 puntos
+                            </span>
+                        </div>
+                    </ng-container>
+
+                    <!-- Description -->
+                    <ng-container *ngIf="solution?.description != null">
+                        <div class="flex sm:items-center mt-4 col-span-2">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:menu-alt-2'"></mat-icon>
+                            <div class="ml-6 leading-6">{{solution?.description}}</div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Organizer -->
+                    <ng-container *ngIf="solution?.organizer">
+                        <div class="flex sm:items-center mt-4">
+                            <mat-icon class="icon-size-5 text-green-500">contact_phone</mat-icon>
+                            <div class="ml-6 leading-6">Organizador:</div>
+                        </div>
+    
+                        <div class="mt-4">
+                            <span class="font-semibold text-secondary">{{solution?.organizer.name}} {{solution?.organizer.last_name}}</span> 
+                        </div>
+                    </ng-container>
+
+                    <!-- Created -->
+                    <ng-container *ngIf="solution?.created">
+                        <div class="flex sm:items-center mt-4">
+                            <mat-icon class="icon-size-5">calendar_today</mat-icon>
+                            <div class="ml-6 leading-6">Fecha de creacion:</div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="font-semibold text-secondary">{{solution?.created}}</span> 
+                        </div>
+                    </ng-container>
+
+                    <!-- Modified -->
+                    <ng-container *ngIf="solution?.modified">
+                        <div class="flex sm:items-center mt-4">
+                            <mat-icon class="icon-size-5">edit</mat-icon>
+                            <div class="ml-6 leading-6">Ultima modificacion:</div>
+                        </div>
+    
+                        <div class="mt-4">
+                            <span class="font-semibold text-secondary">{{solution?.modified}}</span> 
+                        </div>
+                    </ng-container>
+
+                    <mat-list class="col-span-2 grid grid-cols-2 mt-8">
+                        <!-- Members -->
+                        <mat-divider class="col-span-2"></mat-divider>
+                        <div class="col-span-2 mx-auto text-xl" mat-subheader>
+                            Usuarios asignados
+                        </div>
+                        <mat-list-item *ngFor="let member of solution.members" class="col-span-2">
+                            <mat-icon class="p-4 bg-blue-200 rounded-2xl text-blue-900 icon-size-5" matListItemIcon>person</mat-icon>
+                            <div class="ml-4 text-md" matListItemTitle>{{member.role}}: </div>
+                            <div class="ml-4 text-md" matListItemTitle>{{member.member?.name}} {{member.member?.last_name}}</div>
+                            <div class="ml-8">
+                                <container-element [ngSwitch]="member.validation">
+                                    <some-element *ngSwitchCase="'ACCEPTED'">
+                                        <mat-icon class="icon-size-4 text-green-500" *ngIf="member.validation === 'ACCEPTED'">check</mat-icon>
+                                    </some-element>
+                                    <some-element *ngSwitchCase="'REJECTED'">
+                                        <mat-icon class="icon-size-4 text-red-600" *ngIf="member.validation === 'REJECTED'">clear</mat-icon>
+                                    </some-element>
+                                    <some-element *ngSwitchDefault>
+                                        <mat-icon class="icon-size-4 text-gray-600" *ngIf="member.validation === 'REJECTED'">check_box_outline_blank</mat-icon>
+                                    </some-element>
+                                </container-element>
+                            </div>
+                        </mat-list-item>
+                    </mat-list>
+
+                    <!-- Corrective Actions -->
+                    <ng-container *ngIf="solution?.corrective_actions">
+                        <div class="flex flex-col mt-4 py-6 border-t space-y-4 text-center col-span-2">
+                            <mat-label class="font-semibold text-xl">Acciones correctivas</mat-label>
+                        </div>
+                        <div class="grid col-span-2">
+                            <!-- Teble Header -->
+                            <div class="grid-cols-3 sm:grid-cols-6 z-10 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5">
+                                <div class="col-span-1 sm:col-span-2 text-center">
+                                    Por que?
+                                </div>
+                                <div class="mx-auto col-span-1 sm:col-span-2">
+                                    Evidencia
+                                </div>
+                                <div class="mx-auto col-span-1 sm:col-span-2">
+                                    causa raiz?
+                                </div>
+                            </div>
+
+                            <ng-container *ngFor="let action of solution?.corrective_actions">
+                                <div class="grid-cols-3 sm:grid-cols-6 grid items-center gap-4 py-3 px-6 md:px-8 border-b">
+                                    <!-- Why -->
+                                    <div class="col-span-1 sm:col-span-2 text-center">
+                                        {{action.why}}
+                                    </div>
+                                    <!-- Evidence -->
+                                    <div class="mx-auto col-span-1 sm:col-span-2">
+                                        {{action.evidence}}
+                                    </div>
+                                    <!-- Root Cause -->
+                                    <div class="mx-auto col-span-1 sm:col-span-2">
+                                        <mat-icon *ngIf="action.root_cause" class="icon-size-5 text-green-500">check_box</mat-icon>
+                                        <mat-icon *ngIf="!action.root_cause" class="icon-size-5 text-gray-500">check_box_outline_blank</mat-icon>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Edit Mode -->
+    <ng-container *ngIf="editMode">
+        <!-- Header -->
+        <div class="flex items-center justify-between w-full h-16 p-6 pt-0 pb-0 sm:px-12 dark:bg-accent-700">
+            <div class="flex items-center px-4 my-6 leading-9 rounded-2xl cursor-pointer h-10">
+                <span class="text-3xl italic font-semibold">{{ solution.id === ''? 'Registrar': 'Editar'}} Problema</span>
+            </div>
+            <div class="flex items-center">
+                <!-- Close button -->
+                <button mat-icon-button matTooltip="Cerrar" [routerLink]="['../']">
+                        <mat-icon class="text-hint" svgIcon="heroicons_outline:x"></mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <mat-divider class="pt-4"></mat-divider>
+
+        <!-- Body -->
+        <div class="relative flex flex-col flex-auto items-center p-6 pt-0 sm:px-12 sm:pt-0">
+            <div class="w-full">
+                <form [formGroup]="solutionForm">
+                    <!-- Title -->
+                    <div class="mt-4 flex items-center">
+                        <mat-form-field class="w-full">
+                            <mat-label>Titulo</mat-label>
+                            <mat-icon class="hidden sm:flex p-4 text-blue-900 icon-size-5 mr-5">bug_report</mat-icon>
+                            <input class="text-black" matInput [formControlName]="'title'">
+                            <mat-error *ngIf="solutionForm.get('title').errors">
+                                {{matcher.getErrorMessage('title', solutionForm)}}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <!-- Title -->
+                    <div class="mt-4 flex items-center">
+                        <mat-form-field class="w-full">
+                            <mat-label>Disparador</mat-label>
+                            <mat-icon class="hidden sm:flex p-4 text-red-600 icon-size-5 mr-5">gps_fixed</mat-icon>
+                            <input class="text-black" matInput [formControlName]="'trigger'">
+                            <mat-error *ngIf="solutionForm.get('trigger').errors">
+                                {{matcher.getErrorMessage('trigger', solutionForm)}}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <!-- Description -->
+                    <div class="mt-2">
+                        <mat-form-field class="fuse-mat-textarea w-full ">
+                            <mat-label>Descripcion</mat-label>
+                            <mat-icon matPrefix class="hidden sm:flex icon-size-5 " svgIcon="heroicons_solid:menu-alt-2"></mat-icon>
+                            <textarea maxlength="250" placeholder="Descripcion" rows="1" matInput matTextareaAutosize [formControlName]="'description'" [spellcheck]="false" [errorStateMatcher]="matcher" #inputSolutionDescription></textarea>
+                            <mat-error *ngIf="solutionForm.get('description').errors">
+                                {{matcher.getErrorMessage('description', solutionForm)}}
+                            </mat-error>
+                        </mat-form-field>
+                        <div class="text-right">
+                            <span class="font-extralight">{{inputSolutionDescription.value.length}}/250</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col mt-4 py-6 border-t space-y-4 text-center col-span-2">
+                        <mat-label class="font-semibold text-xl">Usuarios asignados</mat-label>
+                    </div>
+
+                    <div class="mt-2" formGroupName="organizer">
+                        <mat-form-field class="w-full">
+                            <mat-label>Organizador</mat-label>
+                            <mat-icon class="hidden sm:flex p-4 text-green-500 icon-size-5 mr-5">contact_phone</mat-icon>
+                            <mat-select [formControlName]="'id'" #operatorSelector>
+                            <ng-container *ngFor="let user of users">
+                                <mat-option [value]="user.id">
+                                    <span class="ml-2 font-medium">{{user.name}} {{user.last_name}}</span>
+                                </mat-option>
+                            </ng-container>
+                            </mat-select>
+                            <mat-error *ngIf="solutionForm.get('organizer').errors">
+                            {{ matcher.getErrorMessage('organizer', solutionForm) }}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div formGroupName="members" class="grid grid-cols-2 gap-x-5">
+                        <div formGroupName="area_manager">
+                            <mat-form-field class="w-full">
+                                <mat-label>Jefe de area</mat-label>
+                                <mat-icon class="hidden sm:flex p-4 text-blue-700 icon-size-5 mr-5">person</mat-icon>
+                                <mat-select [formControlName]="'member'" #operatorSelector>
+                                <ng-container *ngFor="let user of users">
+                                    <mat-option [value]="user.id" [disabled]="isUserSelected('area_manager', user.id)">
+                                        <span class="ml-2 font-medium" [innerHTML]="truncateText(user.name + ' ' + user.last_name)"></span>
+                                    </mat-option>
+                                </ng-container>
+                                </mat-select>
+                                <mat-error *ngIf="solutionForm.get('members.operator.member').errors">
+                                {{ matcher.getErrorMessage('members.operator.member', solutionForm) }}
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <div formGroupName="supervisor">
+                            <mat-form-field class="w-full">
+                                <mat-label>Supervisor</mat-label>
+                                <mat-icon class="hidden sm:flex p-4 text-blue-700 icon-size-5 mr-5">person</mat-icon>
+                                <mat-select [formControlName]="'member'" #operatorSelector>
+                                <ng-container *ngFor="let user of users">
+                                    <mat-option [value]="user.id" [disabled]="isUserSelected('supervisor', user.id)">
+                                        <span class="ml-2 font-medium" [innerHTML]="truncateText(user.name + ' ' + user.last_name)"></span>
+                                    </mat-option>
+                                </ng-container>
+                                </mat-select>
+                                <mat-error *ngIf="solutionForm.get('members.operator.member').errors">
+                                {{ matcher.getErrorMessage('members.operator.member', solutionForm) }}
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <div formGroupName="specialist">
+                            <mat-form-field class="w-full">
+                                <mat-label>Especialista</mat-label>
+                                <mat-icon class="hidden sm:flex p-4 text-blue-700 icon-size-5 mr-5">person</mat-icon>
+                                <mat-select [formControlName]="'member'" #operatorSelector>
+                                <ng-container *ngFor="let user of users">
+                                    <mat-option [value]="user.id" [disabled]="isUserSelected('specialist', user.id)">
+                                        <span class="ml-2 font-medium" [innerHTML]="truncateText(user.name + ' ' + user.last_name)"></span>
+                                    </mat-option>
+                                </ng-container>
+                                </mat-select>
+                                <mat-error *ngIf="solutionForm.get('members.operator.member').errors">
+                                {{ matcher.getErrorMessage('members.operator.member', solutionForm) }}
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <div formGroupName="technician">
+                            <mat-form-field class="w-full">
+                                <mat-label>Tecnico</mat-label>
+                                <mat-icon class="hidden sm:flex p-4 text-blue-700 icon-size-5 mr-5">person</mat-icon>
+                                <mat-select [formControlName]="'member'" #operatorSelector>
+                                <ng-container *ngFor="let user of users">
+                                    <mat-option [value]="user.id" [disabled]="isUserSelected('technician', user.id)">
+                                        <span class="ml-2 font-medium" [innerHTML]="truncateText(user.name + ' ' + user.last_name)"></span>
+                                    </mat-option>
+                                </ng-container>
+                                </mat-select>
+                                <mat-error *ngIf="solutionForm.get('members.operator.member').errors">
+                                {{ matcher.getErrorMessage('members.operator.member', solutionForm) }}
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <div formGroupName="operator">
+                            <mat-form-field class="w-full">
+                                <mat-label>Operador</mat-label>
+                                <mat-icon class="hidden sm:flex p-4 text-blue-700 icon-size-5 mr-5">person</mat-icon>
+                                <mat-select [formControlName]="'member'" #operatorSelector>
+                                <ng-container *ngFor="let user of users">
+                                    <mat-option [value]="user.id" [disabled]="isUserSelected('operator', user.id)">
+                                        <span class="ml-2 font-medium" [innerHTML]="truncateText(user.name + ' ' + user.last_name)"></span>
+                                    </mat-option>
+                                </ng-container>
+                                </mat-select>
+                                <mat-error *ngIf="solutionForm.get('members.operator.member').errors">
+                                {{ matcher.getErrorMessage('members.operator.member', solutionForm) }}
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Corrective Actions -->
+                        <ng-container *ngIf="solution?.corrective_actions">
+                            <div class="flex flex-col mt-4 py-6 border-t space-y-4 text-center col-span-2">
+                                <mat-label class="font-semibold text-xl">Acciones correctivas</mat-label>
+                            </div>
+                            <div class="grid col-span-2">
+                                <!-- Teble Header -->
+                                <div class="grid-cols-3 sm:grid-cols-6 z-10 sticky top-0 grid gap-4 py-4 px-6 md:px-8 shadow text-md font-semibold text-secondary bg-gray-50 dark:bg-black dark:bg-opacity-5">
+                                    <div class="col-span-1 sm:col-span-2 text-center">
+                                        Por que?
+                                    </div>
+                                    <div class="mx-auto col-span-1 sm:col-span-2">
+                                        Evidencia
+                                    </div>
+                                    <div class="mx-auto col-span-1 sm:col-span-2">
+                                        causa raiz?
+                                    </div>
+                                </div>
+
+                                <ng-container *ngFor="let action of solution?.corrective_actions">
+                                    <div class="grid-cols-3 sm:grid-cols-6 grid items-center gap-4 py-3 px-6 md:px-8 border-b">
+                                        <!-- Why -->
+                                        <div class="col-span-1 sm:col-span-2 text-center">
+                                            {{action.why}}
+                                        </div>
+                                        <!-- Evidence -->
+                                        <div class="mx-auto col-span-1 sm:col-span-2">
+                                            {{action.evidence}}
+                                        </div>
+                                        <!-- Root Cause -->
+                                        <div class="mx-auto col-span-1 sm:col-span-2">
+                                            <mat-icon *ngIf="action.root_cause" class="icon-size-5 text-green-500">check_box</mat-icon>
+                                            <mat-icon *ngIf="!action.root_cause" class="icon-size-5 text-gray-500">check_box_outline_blank</mat-icon>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </ng-container>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center mt-10 -mx-6 sm:-mx-12 py-4 pr-4 pl-1 sm:pr-12 sm:pl-7 border-t bg-gray-50 dark:bg-transparent">
+                        <!-- Delete -->
+                        <ng-container *ngIf="solution.id != ''; else updateTask">
+                            <button mat-button color="warn" matTooltip="Eliminar" (click)="deleteProject()">
+                                Eliminar
+                            </button>
+                            <button class="ml-auto" mat-button matTooltip="Cancelar" (click)="toggleEditMode(false)">
+                                Cancelar
+                            </button>
+                        </ng-container>
+                        <ng-template #updateTask>
+                            <button class="ml-auto" mat-button matTooltip="Cancelar"  [routerLink]="['../']">
+                                Cancelar
+                            </button>
+                        </ng-template>
+                        <!-- Save -->
+                        <button class="ml-2" mat-flat-button color="primary" [disabled]="solutionForm.invalid" matTooltip="Guardar" (click)="saveSolution()">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </ng-container>
+</div>

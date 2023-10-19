@@ -1,0 +1,73 @@
+<div class="w-160 h-min-90">
+    <h1 mat-dialog-title>{{data.solution.title}}</h1>
+    <div mat-dialog-content class="text-lg flex flex-col">
+        <div class="grid grid-cols-3">
+            <div class="col-span-2">
+                Detalles del problema y acciones correctivas            
+            </div>
+            <button class="ml-auto" mat-stroked-button [color]="'primary'" (click)="addActionDialog()">
+                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                <span>Agregar</span>
+            </button>
+        </div>
+    </div>
+    <div class="mt-4">
+        <table class="w-full bg-transparent" mat-table matSort [dataSource]="actionsDataSource" #actionsTable>
+            <ng-container matColumnDef="why">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-18">Por que?</th>
+                <td mat-cell *matCellDef="let action">
+                    <span class="font-semibold text-md">
+                        {{action.why}}
+                    </span>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="evidence">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-18">Evidencia</th>
+                <td mat-cell *matCellDef="let action">
+                    <span class="font-semibold text-md">
+                        {{action.evidence}}
+                    </span>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="comment">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-18">Comentario</th>
+                <td mat-cell *matCellDef="let action">
+                    <span class="font-semibold text-md">
+                        {{action.comment}}
+                    </span>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="root_cause">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-18">Causa raiz</th>
+                <td mat-cell *matCellDef="let action">
+                    <span class="font-semibold text-md">
+                        <mat-slide-toggle [color]="'primary'" [checked]="action.root_cause">encontrado</mat-slide-toggle>
+                    </span>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="remove">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-18"></th>
+                <td mat-cell *matCellDef="let action">
+                    <button mat-icon-button (click)="removeCorrectiveAction(action.id)">
+                        <mat-icon class="text-warn-600" svgIcon="heroicons_outline:trash"></mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+    
+            <!-- Footer -->
+            <ng-container matColumnDef="actionsTableFooter">
+                <td class="py-6 px-0 border-0" mat-footer-cell *matFooterCellDef colspan="6">
+                </td>
+            </ng-container>
+    
+            <tr class="bg-gray-600" mat-header-row *matHeaderRowDef="actionsTableColumns"></tr>
+            <tr class="order-row h-16 hover:bg-gray-100 border-b-2" mat-row *matRowDef="let row; columns: actionsTableColumns;"></tr>
+            <tr class="h-16 border-0" mat-footer-row *matFooterRowDef="['actionsTableFooter']"></tr>
+        </table>
+    </div>
+    <div mat-dialog-actions>
+        <button mat-button [color]="'accent'" (click)="updateMemberValidateSolution('ACCEPTED')" mat-dialog-close>Validar solucion</button>
+        <button mat-button [color]="'warn'" (click)="updateMemberValidateSolution('REJECTED')" mat-dialog-close>Rechazar solucion</button>
+    </div>
+</div>

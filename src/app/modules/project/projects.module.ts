@@ -29,6 +29,13 @@ import { BoardsComponent } from "./common/boards/board.component";
 import { TaskDetailsComponent } from "./common/tasks/tasks-details/details-task.component";
 import { GanttComponent } from "./common/gantt/gantt.component";
 import {MatSliderModule} from '@angular/material/slider';
+import { SolutionsComponent } from "./common/solutions/solutions.component";
+import { MatSortModule } from "@angular/material/sort";
+import { MatTableModule } from "@angular/material/table";
+import { MatDialogModule } from "@angular/material/dialog";
+import { CorrectiveActionsDialog } from "./common/solutions/corrective-actions/actions.component";
+import { AddActionDialog } from "./common/solutions/corrective-actions/add-action/add-action.component";
+import { SolutionDetailsComponent } from "./common/solutions/solution-details/details.componen";
 
 @NgModule({
     declarations: [
@@ -39,7 +46,11 @@ import {MatSliderModule} from '@angular/material/slider';
         TasksComponent,
         TaskDetailsComponent,
         BoardsComponent,
-        GanttComponent
+        GanttComponent,
+        SolutionsComponent,
+        SolutionDetailsComponent,
+        CorrectiveActionsDialog,
+        AddActionDialog
     ],
     imports:[
         RouterModule.forChild(projectRoutes),
@@ -62,7 +73,10 @@ import {MatSliderModule} from '@angular/material/slider';
         MatSlideToggleModule,
         MatListModule,
         FuseNavigationModule,
-        MatSliderModule
+        MatSliderModule,
+        MatSortModule,
+        MatTableModule,
+        MatDialogModule
     ],
     providers : []
 })

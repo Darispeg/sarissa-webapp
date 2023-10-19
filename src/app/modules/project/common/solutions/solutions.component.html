@@ -1,0 +1,225 @@
+<div class="flex flex-col flex-auto min-w-0 overflow-hidden">
+    <mat-drawer-container class="flex-auto w-full h-192 dark:bg-transparent">
+        <mat-drawer class="w-full sm:w-160 dark:bg-gray-900" [mode]="drawerSolutionMode" [opened]="false" [position]="'end'" [disableClose]="true" #matDrawerSolution>
+            <router-outlet></router-outlet>
+        </mat-drawer>
+
+        <mat-drawer-content class="flex flex-col">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:py-8 sm:px-10 border-b dark:bg-transparent">
+                <div class="flex-1 min-w-0">
+                    <!-- Breadcrumbs -->
+                    <div class="flex flex-wrap items-center font-medium">
+                        <div>
+                            <a class="whitespace-nowrap text-primary-500">Proyectos</a>
+                        </div>
+                        <div class="flex items-center ml-1 whitespace-nowrap">
+                            <mat-icon
+                                class="icon-size-5 text-secondary"
+                                [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                            <a class="ml-1 text-primary-500">Informacion</a>
+                        </div>
+                        <div class="flex items-center ml-1 whitespace-nowrap">
+                            <mat-icon
+                                class="icon-size-5 text-secondary"
+                                [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                            <span class="ml-1 text-secondary">Analisis de problemas</span>
+                        </div>
+                    </div>
+                    <!-- Title -->
+                    <div class="mt-2">
+                        <h2 class="text-3xl md:text-3xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                            {{project.title}}
+                        </h2>
+                    </div>
+                </div>
+                <!-- Add Solution Button -->
+                <button class="sm:ml-4 w-full sm:w-44 mr-10 sm:mt-0 mt-5" mat-stroked-button [color]="'primary'"  (click)="createAnalysis()">
+                    <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                    <span class="ml-2 mr-1">Agregar Analisis</span>
+                </button>
+                <button
+                    class="-ml-3 sm:ml-0 mb-2 sm:mb-0 order-first sm:order-last"
+                    mat-icon-button
+                    (click)="toggleDrawer()">
+                    <mat-icon [svgIcon]="'heroicons_outline:menu'"></mat-icon>
+                </button>
+            </div>
+            <div class="relative bg-card">
+                <!-- Solutions -->
+                <div class="overflow-x-auto pt-4 bg-card px-4">
+                    <table class="w-full bg-transparent" mat-table matSort [dataSource]="solutionDataSource"
+                            [trackBy]="trackByFn" #solutionTable>
+                        <ng-container matColumnDef="created">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-18">Creado</th>
+                            <td mat-cell *matCellDef="let solution">
+                                <span class="font-semibold text-md">
+                                    {{solution.created}}
+                                </span>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="trigger">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-28">Disparador</th>
+                            <td mat-cell *matCellDef="let solution">
+                                <span class="font-semibold text-md">
+                                    {{solution.trigger}}
+                                </span>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="title">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-28">Titulo</th>
+                            <td mat-cell *matCellDef="let solution">
+                                <span class="font-semibold text-md">
+                                    {{solution.title}}
+                                </span>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="modified">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-18">Editado</th>
+                            <td mat-cell *matCellDef="let solution">
+                                <span class="font-semibold text-md">
+                                    {{solution.modified}}
+                                </span>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="calification">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-12">Calificado</th>
+                            <td mat-cell *matCellDef="let solution">
+                                <span class="font-semibold text-md">
+                                    {{calculateCalification(solution)}}/5
+                                </span>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="operator">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-26">Operador</th>
+                            <td mat-cell *matCellDef="let solution">
+                                <container-element [ngSwitch]="findStatusForMember(solution, 'OPERATOR')">
+                                    <some-element *ngSwitchCase="'ACCEPTED'">
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-green-500 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'OPERATOR')">check_box</mat-icon>
+                                        </button>
+                                    </some-element>
+                                    <some-element *ngSwitchCase="'REJECTED'">
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-red-600 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'OPERATOR')">indeterminate_check_box</mat-icon>
+                                        </button>
+                                    </some-element>
+                                    <some-element *ngSwitchDefault>
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-gray-400 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'OPERATOR')">check_box_outline_blank</mat-icon>
+                                        </button>
+                                    </some-element>
+                                </container-element>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="technician">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-26">Tecnico</th>
+                            <td mat-cell *matCellDef="let solution">
+                                <container-element [ngSwitch]="findStatusForMember(solution, 'TECHNICIAN')">
+                                    <some-element *ngSwitchCase="'ACCEPTED'">
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-green-500 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'TECHNICIAN')">check_box</mat-icon>
+                                        </button>
+                                    </some-element>
+                                    <some-element *ngSwitchCase="'REJECTED'">
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-red-600 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'TECHNICIAN')">indeterminate_check_box</mat-icon>
+                                        </button>
+                                    </some-element>
+                                    <some-element *ngSwitchDefault>
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-gray-400 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'TECHNICIAN')">check_box_outline_blank</mat-icon>
+                                        </button>
+                                    </some-element>
+                                </container-element>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="supervisor">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-26">Supervisor</th>
+                            <td mat-cell *matCellDef="let solution">
+                                <container-element [ngSwitch]="findStatusForMember(solution, 'SUPERVISOR')">
+                                    <some-element *ngSwitchCase="'ACCEPTED'">
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-green-500 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'SUPERVISOR')">check_box</mat-icon>
+                                        </button>
+                                    </some-element>
+                                    <some-element *ngSwitchCase="'REJECTED'">
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-red-600 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'SUPERVISOR')">indeterminate_check_box</mat-icon>
+                                        </button>
+                                    </some-element>
+                                    <some-element *ngSwitchDefault>
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-gray-400 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'SUPERVISOR')">check_box_outline_blank</mat-icon>
+                                        </button>
+                                    </some-element>
+                                </container-element>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="specialist">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-26">Especialista</th>
+                            <td mat-cell *matCellDef="let solution">
+                                <container-element [ngSwitch]="findStatusForMember(solution, 'SPECIALIST')">
+                                    <some-element *ngSwitchCase="'ACCEPTED'">
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-green-500 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'SPECIALIST')">check_box</mat-icon>
+                                        </button>
+                                    </some-element>
+                                    <some-element *ngSwitchCase="'REJECTED'">
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-red-600 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'SPECIALIST')">indeterminate_check_box</mat-icon>
+                                        </button>
+                                    </some-element>
+                                    <some-element *ngSwitchDefault>
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-gray-400 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'SPECIALIST')">check_box_outline_blank</mat-icon>
+                                        </button>
+                                    </some-element>
+                                </container-element>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="area_manager">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef class="font-bold text-white text-md min-w-26">Jefe de area</th>
+                            <td mat-cell *matCellDef="let solution">
+                                <container-element [ngSwitch]="findStatusForMember(solution, 'AREA_MANAGER')">
+                                    <some-element *ngSwitchCase="'ACCEPTED'">
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-green-500 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'AREA_MANAGER')">check_box</mat-icon>
+                                        </button>
+                                    </some-element>
+                                    <some-element *ngSwitchCase="'REJECTED'">
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-red-600 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'AREA_MANAGER')">indeterminate_check_box</mat-icon>
+                                        </button>
+                                    </some-element>
+                                    <some-element *ngSwitchDefault>
+                                        <button mat-icon-button>
+                                            <mat-icon class="text-gray-400 text-3xl" (click)="openCorrectiveActionsDialog(solution, 'AREA_MANAGER')">check_box_outline_blank</mat-icon>
+                                        </button>
+                                    </some-element>
+                                </container-element>
+                            </td>
+                        </ng-container>
+
+                        <!-- Footer -->
+                        <ng-container matColumnDef="solutionTableFooter">
+                            <td class="py-6 px-0 border-0" mat-footer-cell *matFooterCellDef colspan="6">
+                            </td>
+                        </ng-container>
+
+                        <tr class="bg-gray-600" mat-header-row *matHeaderRowDef="solutionTableColumns"></tr>
+                        <tr class="order-row h-16 hover:bg-gray-100 border-b-2" mat-row *matRowDef="let row; columns: solutionTableColumns;" [routerLink]="['./', row.id]"></tr>
+                        <tr class="h-16 border-0" mat-footer-row *matFooterRowDef="['solutionTableFooter']"></tr>
+                    </table>
+                </div>
+                <!-- No Records -->
+                <ng-template #empty>
+                    <div class="flex items-center justify-center dark:bg-transparent my-24">
+                        <mat-icon class="icon-size-20" svgIcon="iconsmind:file_search"></mat-icon>
+                        <div class="mt-6 text-2xl font-semibold tracking-tight text-secondary">Sin Analisis</div>
+                    </div>
+                </ng-template>
+            </div> 
+        </mat-drawer-content>
+    </mat-drawer-container>
+</div>

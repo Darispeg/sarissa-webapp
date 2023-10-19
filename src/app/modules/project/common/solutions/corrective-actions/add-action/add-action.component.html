@@ -1,0 +1,22 @@
+<h1 mat-dialog-title>Agregar accion correctiva</h1>
+<div class="mt-4">
+    <form [formGroup]="actionForm">
+        <mat-form-field class="w-full">
+            <mat-label>Por que?</mat-label>
+            <input class="text-black" matInput [formControlName]="'why'">
+        </mat-form-field>
+        <mat-form-field class="w-full">
+            <mat-label>Evidencia</mat-label>
+            <input class="text-black" matInput [formControlName]="'evidence'">
+        </mat-form-field>
+        <mat-form-field class="w-full">
+            <mat-label>Comentario</mat-label>
+            <input class="text-black" matInput [formControlName]="'comment'">
+        </mat-form-field>
+        <mat-slide-toggle [color]="'primary'" [formControlName]="'root_cause'">causa raiz encontrada?</mat-slide-toggle>
+    </form>
+</div>
+<div mat-dialog-actions>
+    <button mat-button [color]="'accent'" [disabled]="actionForm.invalid" (click)="addCorrectiveAction()" [mat-dialog-close]="actionForm">Agregar</button>
+    <button mat-button [color]="'warn'" mat-dialog-close>Cancelar</button>
+</div>

@@ -1,9 +1,12 @@
+import { SolutionInfo } from "./common/solutions/solutions.types"
+
 export interface Project 
 {
     id?: string
     title: string
     description: string
     tasks? : TaskInfo[]
+    solutions? : SolutionInfo[]
     organizer: UserMember
     members?: UserMember[]
     project_completion: ProjectCompletion

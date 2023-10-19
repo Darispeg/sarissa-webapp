@@ -44,10 +44,7 @@ export class TasksComponent implements OnInit, OnDestroy
         private _taskService: TasksService,
         private _activatedRoute: ActivatedRoute,
         private _changeDetectorRef: ChangeDetectorRef,
-        private _router: Router,
-        private _projectService: ProjectsService,
-        private _fuseMediaWatcherService: FuseMediaWatcherService,
-        private _fuseNavigationService: FuseNavigationService
+        private _router: Router
     )
     {}
     
